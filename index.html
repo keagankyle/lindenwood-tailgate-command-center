@@ -39,12 +39,26 @@ require([
   "esri/views/MapView",
   "esri/layers/GeoJSONLayer"
 ], function(Map, MapView, GeoJSONLayer) {
-  
-  // Create a layer for the main tailgate zones
+
+  // Create the popup template to show your safety and capacity metadata
+  const template = {
+    title: "Tailgate Info: {Lot_Name}",
+    content: [
+      {
+        type: "fields",
+        fieldInfos: [
+          { fieldName: "Parking_Type", label: "Parking Type" },
+          { fieldName: "Opening_Time", label: "Opens" },
+          { fieldName: "Permit_Required", label: "Permit Required" }
+        ]
+      }
+    ]
+  };
+
+  // Initialize the layer using your uploaded GeoJSON data
   const tailgateLayer = new GeoJSONLayer({
     url: "data/Lindenwood_Tailgate_2026.geojson",
-    title: "2026 Tailgate Zones",
-    // Adding a basic renderer to distinguish lots
+    popupTemplate: template,
     renderer: {
       type: "simple",
       symbol: {
@@ -57,15 +71,16 @@ require([
 
   const map = new Map({
     basemap: "topo-vector",
-    layers: [tailgateLayer]
+    layers: [tailgateLayer] // Ensure the layer is added to the map
   });
 
   const view = new MapView({
     container: "viewDiv",
-    center: [-90.503, 38.786], // Centered closer to Lot B/C area
+    center: [-90.503, 38.786], // Centered on the main tailgate area
     zoom: 16,
     map: map
   });
+});
   </script>
 </body>
 </html>
