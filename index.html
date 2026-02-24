@@ -50,7 +50,7 @@ require([
     }]
   };
 
-  // Define the Primary Layout layer
+  // Primary Layer
   const tailgateLayer = new GeoJSONLayer({
     url: "data/Lindenwood_Tailgate_2026.geojson",
     popupTemplate: template,
@@ -59,23 +59,23 @@ require([
       type: "simple",
       symbol: {
         type: "simple-fill",
-        color: [175, 147, 90, 0.5], // Lindenwood Gold
+        color: [175, 147, 90, 0.5], // LU Gold
         outline: { color: [255, 255, 255], width: 1 }
       }
     }
   });
 
-  // Define the Alternate/Heritage Layout layer (starts hidden)
+  // Heritage Layer
   const heritageLayer = new GeoJSONLayer({
     url: "data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson",
     popupTemplate: template,
     title: "Heritage Side",
-    visible: false, 
+    visible: false, // Hidden by default
     renderer: {
       type: "simple",
       symbol: {
         type: "simple-fill",
-        color: [0, 0, 0, 0.5], // Black for contrast
+        color: [0, 0, 0, 0.5], // Black
         outline: { color: [255, 255, 255], width: 1 }
       }
     }
@@ -83,7 +83,7 @@ require([
 
   const map = new Map({
     basemap: "topo-vector",
-    layers: [tailgateLayer, heritageLayer] 
+    layers: [tailgateLayer, heritageLayer]
   });
 
   const view = new MapView({
@@ -93,16 +93,28 @@ require([
     map: map
   });
 
-  // Logic to handle button clicks and toggle visibility
+  // Error logging to catch why the map is white
+  tailgateLayer.load().catch((error) => {
+    console.error("Primary Layer failed to load: ", error);
+  });
+
+  // Toggle logic
   view.when(() => {
-    document.getElementById("primaryBtn").onclick = () => {
-      tailgateLayer.visible = true;
-      heritageLayer.visible = false;
-    };
-    document.getElementById("heritageBtn").onclick = () => {
-      tailgateLayer.visible = false;
-      heritageLayer.visible = true;
-    };
+    const primaryBtn = document.getElementById("primaryBtn");
+    const heritageBtn = document.getElementById("heritageBtn");
+
+    if (primaryBtn && heritageBtn) {
+      primaryBtn.onclick = () => {
+        tailgateLayer.visible = true;
+        heritageLayer.visible = false;
+      };
+      heritageBtn.onclick = () => {
+        tailgateLayer.visible = false;
+        heritageLayer.visible = true;
+      };
+    } else {
+      console.warn("Buttons not found! Check your HTML IDs.");
+    }
   });
 });
   </script>
