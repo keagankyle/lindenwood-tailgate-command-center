@@ -9,14 +9,14 @@
   <script src="https://js.arcgis.com/4.28/"></script>
 
   <style>
-    html, body, #viewDiv { padding: 0; margin: 0; height: 100%; width: 100%; overflow: hidden; }
+    html, body, #viewDiv { padding: 0; margin: 0; height: 100%; width: 100%; }
     #sidebar {
       position: absolute; top: 10px; right: 10px; width: 250px;
       background: rgba(255, 255, 255, 0.9); padding: 15px;
       border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.3);
       z-index: 99; font-family: sans-serif;
     }
-    .lu-gold { color: #af935a; font-weight: bold; } /* Lindenwood Gold */
+    .lu-gold { color: #af935a; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -24,12 +24,12 @@
     <h2 class="lu-gold">2026 Tailgate Center</h2>
     <p>Safety & Logistics Dashboard</p>
     <hr>
-<div id="layerToggle">
-  <p>Select Layout:</p>
-  <button id="primaryBtn">Primary Layout</button>
-  <button id="heritageBtn">Alternate Layout</button>
-</div>
-  <div id="viewDiv"></div>
+    <div id="layerToggle">
+      <p>Select Layout:</p>
+      <button id="primaryBtn">Primary Layout</button>
+      <button id="heritageBtn">Alternate Layout</button>
+    </div>
+  </div> <div id="viewDiv"></div>
 
   <script>
 require([
@@ -50,7 +50,6 @@ require([
     }]
   };
 
-  // Primary Layer
   const tailgateLayer = new GeoJSONLayer({
     url: "data/Lindenwood_Tailgate_2026.geojson",
     popupTemplate: template,
@@ -59,23 +58,22 @@ require([
       type: "simple",
       symbol: {
         type: "simple-fill",
-        color: [175, 147, 90, 0.5], // LU Gold
+        color: [175, 147, 90, 0.5],
         outline: { color: [255, 255, 255], width: 1 }
       }
     }
   });
 
-  // Heritage Layer
   const heritageLayer = new GeoJSONLayer({
     url: "data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson",
     popupTemplate: template,
     title: "Heritage Side",
-    visible: false, // Hidden by default
+    visible: false,
     renderer: {
       type: "simple",
       symbol: {
         type: "simple-fill",
-        color: [0, 0, 0, 0.5], // Black
+        color: [0, 0, 0, 0.5],
         outline: { color: [255, 255, 255], width: 1 }
       }
     }
@@ -93,28 +91,15 @@ require([
     map: map
   });
 
-  // Error logging to catch why the map is white
-  tailgateLayer.load().catch((error) => {
-    console.error("Primary Layer failed to load: ", error);
-  });
-
-  // Toggle logic
   view.when(() => {
-    const primaryBtn = document.getElementById("primaryBtn");
-    const heritageBtn = document.getElementById("heritageBtn");
-
-    if (primaryBtn && heritageBtn) {
-      primaryBtn.onclick = () => {
-        tailgateLayer.visible = true;
-        heritageLayer.visible = false;
-      };
-      heritageBtn.onclick = () => {
-        tailgateLayer.visible = false;
-        heritageLayer.visible = true;
-      };
-    } else {
-      console.warn("Buttons not found! Check your HTML IDs.");
-    }
+    document.getElementById("primaryBtn").onclick = () => {
+      tailgateLayer.visible = true;
+      heritageLayer.visible = false;
+    };
+    document.getElementById("heritageBtn").onclick = () => {
+      tailgateLayer.visible = false;
+      heritageLayer.visible = true;
+    };
   });
 });
   </script>
