@@ -24,12 +24,11 @@
     <h2 class="lu-gold">2026 Tailgate Center</h2>
     <p>Safety & Logistics Dashboard</p>
     <hr>
-   <div id="layerToggle">
+<div id="layerToggle">
   <p>Select Layout:</p>
   <button id="primaryBtn">Primary Layout</button>
-  <button id="heritageBtn">Heritage Side</button>
+  <button id="heritageBtn">Alternate Layout</button>
 </div>
-
   <div id="viewDiv"></div>
 
   <script>
@@ -51,7 +50,7 @@ require([
     }]
   };
 
-  // 1. Primary Layout Layer
+  // Define the Primary Layout layer
   const tailgateLayer = new GeoJSONLayer({
     url: "data/Lindenwood_Tailgate_2026.geojson",
     popupTemplate: template,
@@ -60,18 +59,18 @@ require([
       type: "simple",
       symbol: {
         type: "simple-fill",
-        color: [175, 147, 90, 0.5], // LU Gold
+        color: [175, 147, 90, 0.5], // Lindenwood Gold
         outline: { color: [255, 255, 255], width: 1 }
       }
     }
   });
 
-  // 2. Heritage Side Layer (Added this for your toggle)
+  // Define the Alternate/Heritage Layout layer (starts hidden)
   const heritageLayer = new GeoJSONLayer({
     url: "data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson",
     popupTemplate: template,
     title: "Heritage Side",
-    visible: false, // Start with this hidden
+    visible: false, 
     renderer: {
       type: "simple",
       symbol: {
@@ -94,8 +93,7 @@ require([
     map: map
   });
 
-  // --- PLACE TOGGLE LOGIC HERE ---
-  // This waits for the view to load, then listens for button clicks
+  // Logic to handle button clicks and toggle visibility
   view.when(() => {
     document.getElementById("primaryBtn").onclick = () => {
       tailgateLayer.visible = true;
