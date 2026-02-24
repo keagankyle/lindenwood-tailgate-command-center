@@ -26,8 +26,8 @@
     <hr>
     <div id="layerToggle">
       <p>Select Layout:</p>
-      <button id="primaryBtn">Primary Layout</button>
-      <button id="heritageBtn">Alternate Layout</button>
+      <button id="primaryBtn">Improved Layout</button>
+      <button id="heritageBtn">Heritage Layout</button>
     </div>
   </div> <div id="viewDiv"></div>
 
@@ -53,7 +53,7 @@ require([
   const tailgateLayer = new GeoJSONLayer({
     url: "data/Lindenwood_Tailgate_2026.geojson",
     popupTemplate: template,
-    title: "Primary Layout",
+    title: "Improved Layout",
     renderer: {
       type: "simple",
       symbol: {
