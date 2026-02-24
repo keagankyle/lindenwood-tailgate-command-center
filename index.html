@@ -24,12 +24,11 @@
     <h2 class="lu-gold">2026 Tailgate Center</h2>
     <p>Safety & Logistics Dashboard</p>
     <hr>
-    <div id="layerToggle">
-      <p>Select Layout:</p>
-      <button onclick="console.log('Toggle Layer 1')">Primary Layout</button>
-      <button onclick="console.log('Toggle Layer 2')">Alternate Layout</button>
-    </div>
-  </div>
+   <div id="layerToggle">
+  <p>Select Layout:</p>
+  <button id="primaryBtn">Primary Layout</button>
+  <button id="heritageBtn">Heritage Side</button>
+</div>
 
   <div id="viewDiv"></div>
 
@@ -40,30 +39,44 @@ require([
   "esri/layers/GeoJSONLayer"
 ], function(Map, MapView, GeoJSONLayer) {
 
-  // Create the popup template to show your safety and capacity metadata
   const template = {
     title: "Tailgate Info: {Lot_Name}",
-    content: [
-      {
-        type: "fields",
-        fieldInfos: [
-          { fieldName: "Parking_Type", label: "Parking Type" },
-          { fieldName: "Opening_Time", label: "Opens" },
-          { fieldName: "Permit_Required", label: "Permit Required" }
-        ]
-      }
-    ]
+    content: [{
+      type: "fields",
+      fieldInfos: [
+        { fieldName: "Parking_Type", label: "Parking Type" },
+        { fieldName: "Opening_Time", label: "Opens" },
+        { fieldName: "Permit_Required", label: "Permit Required" }
+      ]
+    }]
   };
 
-  // Initialize the layer using your uploaded GeoJSON data
+  // 1. Primary Layout Layer
   const tailgateLayer = new GeoJSONLayer({
     url: "data/Lindenwood_Tailgate_2026.geojson",
     popupTemplate: template,
+    title: "Primary Layout",
     renderer: {
       type: "simple",
       symbol: {
         type: "simple-fill",
-        color: [175, 147, 90, 0.5], // Lindenwood Gold with transparency
+        color: [175, 147, 90, 0.5], // LU Gold
+        outline: { color: [255, 255, 255], width: 1 }
+      }
+    }
+  });
+
+  // 2. Heritage Side Layer (Added this for your toggle)
+  const heritageLayer = new GeoJSONLayer({
+    url: "data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson",
+    popupTemplate: template,
+    title: "Heritage Side",
+    visible: false, // Start with this hidden
+    renderer: {
+      type: "simple",
+      symbol: {
+        type: "simple-fill",
+        color: [0, 0, 0, 0.5], // Black for contrast
         outline: { color: [255, 255, 255], width: 1 }
       }
     }
@@ -71,14 +84,27 @@ require([
 
   const map = new Map({
     basemap: "topo-vector",
-    layers: [tailgateLayer] // Ensure the layer is added to the map
+    layers: [tailgateLayer, heritageLayer] 
   });
 
   const view = new MapView({
     container: "viewDiv",
-    center: [-90.503, 38.786], // Centered on the main tailgate area
+    center: [-90.503, 38.786],
     zoom: 16,
     map: map
+  });
+
+  // --- PLACE TOGGLE LOGIC HERE ---
+  // This waits for the view to load, then listens for button clicks
+  view.when(() => {
+    document.getElementById("primaryBtn").onclick = () => {
+      tailgateLayer.visible = true;
+      heritageLayer.visible = false;
+    };
+    document.getElementById("heritageBtn").onclick = () => {
+      tailgateLayer.visible = false;
+      heritageLayer.visible = true;
+    };
   });
 });
   </script>
