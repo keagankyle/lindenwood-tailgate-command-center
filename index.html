@@ -24,10 +24,11 @@
     <h2 class="lu-gold">2026 Tailgate Center</h2>
     <p>Safety & Logistics Dashboard</p>
     <hr>
-  <div id="layerToggle">
+ <div id="layerToggle">
   <p>Select Layout:</p>
   <button id="primaryBtn">Improved Layout</button>
   <button id="heritageBtn">Heritage Layout</button>
+  <button id="harmonBtn">Harmon Lot</button> </div>
 </div>
   </div> <div id="viewDiv"></div>
 
@@ -79,11 +80,24 @@ require([
     }
   });
 
-  const map = new Map({
-    basemap: "topo-vector",
-    layers: [tailgateLayer, heritageLayer]
-  });
-
+  const harmonLayer = new GeoJSONLayer({
+  url: "data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson",
+  popupTemplate: template,
+  title: "Harmon Lot",
+  visible: false,
+  renderer: {
+    type: "simple",
+    symbol: {
+      type: "simple-fill",
+      color: [175, 147, 90, 0.5], // LU Gold with transparency
+      outline: { color: [255, 255, 255], width: 1 }
+    }
+  }
+});
+ const map = new Map({
+  basemap: "topo-vector",
+  layers: [tailgateLayer, heritageLayer, harmonLayer] // Add harmonLayer here
+});
   const view = new MapView({
     container: "viewDiv",
     center: [-90.503, 38.786],
@@ -91,16 +105,23 @@ require([
     map: map
   });
 
-  view.when(() => {
-    document.getElementById("primaryBtn").onclick = () => {
-      tailgateLayer.visible = true;
-      heritageLayer.visible = false;
-    };
-    document.getElementById("heritageBtn").onclick = () => {
-      tailgateLayer.visible = false;
-      heritageLayer.visible = true;
-    };
-  });
+ view.when(() => {
+  document.getElementById("primaryBtn").onclick = () => {
+    tailgateLayer.visible = true;
+    heritageLayer.visible = false;
+    harmonLayer.visible = false;
+  };
+  document.getElementById("heritageBtn").onclick = () => {
+    tailgateLayer.visible = false;
+    heritageLayer.visible = true;
+    harmonLayer.visible = false;
+  };
+  document.getElementById("harmonBtn").onclick = () => {
+    tailgateLayer.visible = false;
+    heritageLayer.visible = false;
+    harmonLayer.visible = true;
+  };
+});
 });
   </script>
 </body>
