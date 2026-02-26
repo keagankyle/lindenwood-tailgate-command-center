@@ -17,6 +17,11 @@
       z-index: 99; font-family: sans-serif;
     }
     .lu-gold { color: #af935a; font-weight: bold; }
+    button { 
+      width: 100%; margin-top: 5px; padding: 8px; 
+      cursor: pointer; border: 1px solid #ccc; border-radius: 4px; 
+    }
+    button:hover { background-color: #f0f0f0; }
   </style>
 </head>
 <body>
@@ -24,13 +29,14 @@
     <h2 class="lu-gold">2026 Tailgate Center</h2>
     <p>Safety & Logistics Dashboard</p>
     <hr>
- <div id="layerToggle">
-  <p>Select Layout:</p>
-  <button id="primaryBtn">Improved Layout</button>
-  <button id="heritageBtn">Heritage Layout</button>
-  <button id="harmonBtn">Harmon Lot</button> </div>
-</div>
-  </div> <div id="viewDiv"></div>
+    <div id="layerToggle">
+      <p>Select Layout:</p>
+      <button id="primaryBtn">Improved Layout</button>
+      <button id="heritageBtn">Heritage Side</button>
+      <button id="harmonBtn">Harmon Lot</button>
+    </div>
+  </div> 
+  <div id="viewDiv"></div>
 
   <script>
 require([
@@ -39,65 +45,71 @@ require([
   "esri/layers/GeoJSONLayer"
 ], function(Map, MapView, GeoJSONLayer) {
 
+  // 1. POPUP TEMPLATE: Matches the fields in your GeoJSON files
   const template = {
-    title: "Tailgate Info: {Lot_Name}",
+    title: "Lot Information",
     content: [{
       type: "fields",
       fieldInfos: [
-        { fieldName: "Parking_Type", label: "Parking Type" },
+        { fieldName: "Lot_Name", label: "Lot Name" },
+        { fieldName: "Parking_Type", label: "Type" },
         { fieldName: "Opening_Time", label: "Opens" },
-        { fieldName: "Permit_Required", label: "Permit Required" }
+        { fieldName: "Permit_Required", label: "Permit?" },
+        { fieldName: "Access_Level", label: "Access Info" }
       ]
     }]
   };
 
+  // 2. RENDERER: Assigns colors based on Parking_Type to mimic ArcGIS Pro
+  const lotRenderer = {
+    type: "unique-value",
+    field: "Parking_Type",
+    defaultSymbol: { type: "simple-fill", color: [175, 147, 90, 0.4], outline: { color: "white", width: 1 } },
+    uniqueValueInfos: [
+      {
+        value: "Open Parking & Tailgate Lot",
+        symbol: { type: "simple-fill", color: [34, 139, 34, 0.5], outline: { color: "white", width: 1.5 } } // Green
+      },
+      {
+        value: "Parking ONLY - No Tailgating",
+        symbol: { type: "simple-fill", color: [175, 147, 90, 0.5], outline: { color: "white", width: 1 } } // LU Gold
+      },
+      {
+        value: "Student Parking ONLY - NO Gameday Parking",
+        symbol: { type: "simple-fill", color: [220, 20, 60, 0.5], outline: { color: "white", width: 1 } } // Red/Restricted
+      }
+    ]
+  };
+
+  // 3. LAYERS: Define all three layers
   const tailgateLayer = new GeoJSONLayer({
     url: "data/Lindenwood_Tailgate_2026.geojson",
     popupTemplate: template,
-    title: "Improved Layout",
-    renderer: {
-      type: "simple",
-      symbol: {
-        type: "simple-fill",
-        color: [175, 147, 90, 0.5],
-        outline: { color: [255, 255, 255], width: 1 }
-      }
-    }
+    renderer: lotRenderer,
+    title: "Improved Layout"
   });
 
   const heritageLayer = new GeoJSONLayer({
     url: "data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson",
     popupTemplate: template,
-    title: "Heritage Side",
+    renderer: lotRenderer,
     visible: false,
-    renderer: {
-      type: "simple",
-      symbol: {
-        type: "simple-fill",
-        color: [0, 0, 0, 0.5],
-        outline: { color: [255, 255, 255], width: 1 }
-      }
-    }
+    title: "Heritage Side"
   });
 
   const harmonLayer = new GeoJSONLayer({
-  url: "data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson",
-  popupTemplate: template,
-  title: "Harmon Lot",
-  visible: false,
-  renderer: {
-    type: "simple",
-    symbol: {
-      type: "simple-fill",
-      color: [175, 147, 90, 0.5], // LU Gold with transparency
-      outline: { color: [255, 255, 255], width: 1 }
-    }
-  }
-});
- const map = new Map({
-  basemap: "topo-vector",
-  layers: [tailgateLayer, heritageLayer, harmonLayer] // Add harmonLayer here
-});
+    url: "data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson",
+    popupTemplate: template,
+    renderer: lotRenderer,
+    visible: false,
+    title: "Harmon Lot"
+  });
+
+  const map = new Map({
+    basemap: "topo-vector",
+    layers: [tailgateLayer, heritageLayer, harmonLayer]
+  });
+
   const view = new MapView({
     container: "viewDiv",
     center: [-90.503, 38.786],
@@ -105,23 +117,18 @@ require([
     map: map
   });
 
- view.when(() => {
-  document.getElementById("primaryBtn").onclick = () => {
-    tailgateLayer.visible = true;
-    heritageLayer.visible = false;
-    harmonLayer.visible = false;
-  };
-  document.getElementById("heritageBtn").onclick = () => {
-    tailgateLayer.visible = false;
-    heritageLayer.visible = true;
-    harmonLayer.visible = false;
-  };
-  document.getElementById("harmonBtn").onclick = () => {
-    tailgateLayer.visible = false;
-    heritageLayer.visible = false;
-    harmonLayer.visible = true;
-  };
-});
+  // 4. TOGGLE LOGIC: Controls visibility for all three maps
+  view.when(() => {
+    const toggle = (activeLayer) => {
+      [tailgateLayer, heritageLayer, harmonLayer].forEach(layer => {
+        layer.visible = (layer === activeLayer);
+      });
+    };
+
+    document.getElementById("primaryBtn").onclick = () => toggle(tailgateLayer);
+    document.getElementById("heritageBtn").onclick = () => toggle(heritageLayer);
+    document.getElementById("harmonBtn").onclick = () => toggle(harmonLayer);
+  });
 });
   </script>
 </body>
