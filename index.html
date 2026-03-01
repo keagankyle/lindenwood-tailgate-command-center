@@ -57,8 +57,9 @@
 require([
   "esri/Map",
   "esri/views/MapView",
-  "esri/layers/GeoJSONLayer"
-], function(Map, MapView, GeoJSONLayer) {
+  "esri/layers/GeoJSONLayer",
+  "esri/widgets/Legend" // 1. Add the path
+], function(Map, MapView, GeoJSONLayer, Legend) { // 2. Add the argument
 
   // 1. POPUP TEMPLATE: Matches the fields in your GeoJSON files
   const template = {
