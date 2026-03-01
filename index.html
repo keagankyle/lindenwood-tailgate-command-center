@@ -54,14 +54,13 @@
   <div id="viewDiv"></div>
 
   <script>
-require([
+    require([
   "esri/Map",
   "esri/views/MapView",
   "esri/layers/GeoJSONLayer",
-  "esri/widgets/Legend" // 1. Add the path
-], function(Map, MapView, GeoJSONLayer, Legend) { // 2. Add the argument
+  "esri/widgets/Legend"
+], function(Map, MapView, GeoJSONLayer, Legend) { // Added Legend here
 
-  // 1. POPUP TEMPLATE: Matches the fields in your GeoJSON files
   const template = {
     title: "Lot Information",
     content: [{
@@ -75,48 +74,46 @@ require([
       ]
     }]
   };
-const lotRenderer = {
-  type: "unique-value",
-  field: "Parking_Type",
-  defaultSymbol: {
-    type: "simple-fill",
-    color: [128, 128, 128, 0.4],
-    outline: { color: "white", width: 1 }
-  },
-  uniqueValueInfos: [
-    { value: "Open Parking & Tailgate Lot",
-      symbol: { type: "simple-fill", color: [34, 139, 34, 0.6], outline: { color: "white", width: 1.5 } },
-      label: "Open Parking & Tailgate" },
-    { value: "Tailgate Lot ONLY - No Parking",
-      symbol: { type: "simple-fill", color: [0, 100, 0, 0.6], outline: { color: "white", width: 1.5 } },
-      label: "Tailgate Only (No Parking)" },
-    { value: "Approved Tailgate Spots Only",
-      symbol: { type: "simple-fill", color: [0, 128, 128, 0.6], outline: { color: "white", width: 1.5 } },
-      label: "Approved Tailgate Spots" },
-    { value: "Parking ONLY - No Tailgating",
-      symbol: { type: "simple-fill", color: [175, 147, 90, 0.6], outline: { color: "white", width: 1 } },
-      label: "Parking Only (No Tailgating)" },
-    { value: "Student Parking ONLY - NO Gameday Parking",
-      symbol: { type: "simple-fill", color: [220, 20, 60, 0.5], outline: { color: "white", width: 1 } },
-      label: "Student Only (Restricted)" },
-    { value: "Opposing Team Parking/Tailgate",
-      symbol: { type: "simple-fill", color: [255, 140, 0, 0.6], outline: { color: "white", width: 1.5 } },
-      label: "Opposing Team Area" },
-    { value: "Handicap",
-      symbol: { type: "simple-fill", color: [30, 100, 200, 0.6], outline: { color: "white", width: 2 } },
-      label: "Accessible Parking" },
-    { value: "Handicap ",
-      symbol: { type: "simple-fill", color: [30, 100, 200, 0.6], outline: { color: "white", width: 2 } },
-      label: "Accessible Parking" },
-    { value: "Public Safety & Campus Operations",
-      symbol: { type: "simple-fill", color: [80, 80, 80, 0.5], outline: { color: "white", width: 1 } },
-      label: "Public Safety & Operations" },
-    { value: "Football Team Parking ONLY - NO Gameday Spectator Parking", 
-      symbol: { type: "simple-fill", color: [100, 50, 150, 0.6], outline: { color: "white", width: 1 } },
-      label: "Team Parking Only" }
-  ]
-};
-  // 3. LAYERS: Define all three layers with absolute relative paths
+
+  const lotRenderer = {
+    type: "unique-value",
+    field: "Parking_Type",
+    defaultSymbol: {
+      type: "simple-fill",
+      color: [128, 128, 128, 0.4],
+      outline: { color: "white", width: 1 }
+    },
+    uniqueValueInfos: [
+      { value: "Open Parking & Tailgate Lot",
+        symbol: { type: "simple-fill", color: [34, 139, 34, 0.6], outline: { color: "white", width: 1.5 } },
+        label: "Open Parking & Tailgate" },
+      { value: "Tailgate Lot ONLY - No Parking",
+        symbol: { type: "simple-fill", color: [0, 100, 0, 0.6], outline: { color: "white", width: 1.5 } },
+        label: "Tailgate Only (No Parking)" },
+      { value: "Approved Tailgate Spots Only",
+        symbol: { type: "simple-fill", color: [0, 128, 128, 0.6], outline: { color: "white", width: 1.5 } },
+        label: "Approved Tailgate Spots" },
+      { value: "Parking ONLY - No Tailgating",
+        symbol: { type: "simple-fill", color: [175, 147, 90, 0.6], outline: { color: "white", width: 1 } },
+        label: "Parking Only (No Tailgating)" },
+      { value: "Student Parking ONLY - NO Gameday Parking",
+        symbol: { type: "simple-fill", color: [220, 20, 60, 0.5], outline: { color: "white", width: 1 } },
+        label: "Student Only (Restricted)" },
+      { value: "Opposing Team Parking/Tailgate",
+        symbol: { type: "simple-fill", color: [255, 140, 0, 0.6], outline: { color: "white", width: 1.5 } },
+        label: "Opposing Team Area" },
+      { value: "Handicap",
+        symbol: { type: "simple-fill", color: [30, 100, 200, 0.6], outline: { color: "white", width: 2 } },
+        label: "Accessible Parking" },
+      { value: "Public Safety & Campus Operations",
+        symbol: { type: "simple-fill", color: [80, 80, 80, 0.5], outline: { color: "white", width: 1 } },
+        label: "Public Safety & Operations" },
+      { value: "Football Team Parking ONLY - NO Gameday Spectator Parking", 
+        symbol: { type: "simple-fill", color: [100, 50, 150, 0.6], outline: { color: "white", width: 1 } },
+        label: "Team Parking Only" }
+    ]
+  };
+
   const tailgateLayer = new GeoJSONLayer({
     url: "./data/Lindenwood_Tailgate_2026.geojson",
     popupTemplate: template,
@@ -139,6 +136,7 @@ const lotRenderer = {
     visible: false,
     title: "Harmon Lot"
   });
+
   const map = new Map({
     basemap: "topo-vector",
     layers: [tailgateLayer, heritageLayer, harmonLayer]
@@ -150,32 +148,29 @@ const lotRenderer = {
     zoom: 16,
     map: map
   });
-// Create the Legend widget
-  // ... after MapView initialization ...
-view.when(() => {
-  // Create the Legend widget ONLY after the view is ready
-  const legend = new Legend({
-    view: view,
-    layerInfos: [
-      { layer: tailgateLayer, title: "Improved Layout" },
-      { layer: heritageLayer, title: "Heritage Side" },
-      { layer: harmonLayer, title: "Harmon Lot" }
-    ]
-  });
 
-  // Add the widget to the bottom-left corner
-  view.ui.add(legend, "bottom-left");
-
-  // Toggle Logic
-  const toggle = (activeLayer) => {
-    [tailgateLayer, heritageLayer, harmonLayer].forEach(layer => {
-      layer.visible = (layer === activeLayer);
+  view.when(() => {
+    const legend = new Legend({
+      view: view,
+      layerInfos: [
+        { layer: tailgateLayer, title: "Improved Layout" },
+        { layer: heritageLayer, title: "Heritage Side" },
+        { layer: harmonLayer, title: "Harmon Lot" }
+      ]
     });
-  };
 
-  document.getElementById("primaryBtn").onclick = () => toggle(tailgateLayer);
-  document.getElementById("heritageBtn").onclick = () => toggle(heritageLayer);
-  document.getElementById("harmonBtn").onclick = () => toggle(harmonLayer);
+    view.ui.add(legend, "bottom-left");
+
+    const toggle = (activeLayer) => {
+      [tailgateLayer, heritageLayer, harmonLayer].forEach(layer => {
+        layer.visible = (layer === activeLayer);
+      });
+    };
+
+    document.getElementById("primaryBtn").onclick = () => toggle(tailgateLayer);
+    document.getElementById("heritageBtn").onclick = () => toggle(heritageLayer);
+    document.getElementById("harmonBtn").onclick = () => toggle(harmonLayer);
+  });
 });
   </script>
 </body>
