@@ -165,29 +165,36 @@ const lotRenderer = {
     map: map
   });
 // Create the Legend widget
-  const legend = new Legend({
-    view: view,
-    layerInfos: [
-      {
-        layer: tailgateLayer,
-        title: "Lindenwood Tailgate Zones"
-      }
-    ]
-  });
+const legend = new Legend({
+  view: view,
+  layerInfos: [
+    {
+      layer: tailgateLayer,
+      title: "Improved Layout"
+    },
+    {
+      layer: heritageLayer,
+      title: "Heritage Side"
+    },
+    {
+      layer: harmonLayer,
+      title: "Harmon Lot"
+    }
+  ]
+});
   // Add the widget to the bottom-left corner of the view
   view.ui.add(legend, "bottom-left");
   // 4. TOGGLE LOGIC: Controls visibility for all three maps
   view.when(() => {
-    const toggle = (activeLayer) => {
-      [tailgateLayer, heritageLayer, harmonLayer].forEach(layer => {
-        layer.visible = (layer === activeLayer);
-      });
-    };
-
-    document.getElementById("primaryBtn").onclick = () => toggle(tailgateLayer);
-    document.getElementById("heritageBtn").onclick = () => toggle(heritageLayer);
-    document.getElementById("harmonBtn").onclick = () => toggle(harmonLayer);
+  const toggle = (activeLayer) => {
+  [tailgateLayer, heritageLayer, harmonLayer].forEach(layer => {
+    layer.visible = (layer === activeLayer);
   });
+};
+
+document.getElementById("primaryBtn").onclick = () => toggle(tailgateLayer);
+document.getElementById("heritageBtn").onclick = () => toggle(heritageLayer);
+document.getElementById("harmonBtn").onclick = () => toggle(harmonLayer);
 });
   </script>
 </body>
