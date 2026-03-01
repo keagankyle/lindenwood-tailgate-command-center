@@ -113,29 +113,56 @@
         label: "Team Parking Only" }
     ]
   };
+// Renderer for Improved Layout (using Parking_Type)
+const tailgateRenderer = {
+  type: "unique-value",
+  field: "Parking_Type", 
+  uniqueValueInfos: [
+    { value: "Open Parking & Tailgate Lot", symbol: { type: "simple-fill", color: [34, 139, 34, 0.6] } }
+    // ... add your other values here
+  ]
+};
 
-  const tailgateLayer = new GeoJSONLayer({
-    url: "./data/Lindenwood_Tailgate_2026.geojson",
-    popupTemplate: template,
-    renderer: lotRenderer,
-    title: "Improved Layout"
-  });
+// Renderer for Heritage (using the field name you found, e.g., "Lot_Name" or "Public_Parking")
+const heritageRenderer = {
+  type: "unique-value",
+  field: "Lot_Name", // Change this to the exact field name in the Heritage GeoJSON
+  uniqueValueInfos: [
+    { value: "Public Parking", symbol: { type: "simple-fill", color: [34, 139, 34, 0.6] } }
+    // ... add the specific values found in the Heritage file
+  ]
+};
 
-  const heritageLayer = new GeoJSONLayer({
-    url: "./data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson",
-    popupTemplate: template,
-    renderer: lotRenderer,
-    visible: false,
-    title: "Heritage Side"
-  });
+// Renderer for Harmon Lot
+const harmonRenderer = {
+  type: "unique-value",
+  field: "Lot_Name", // Change this to the exact field name in the Harmon GeoJSON
+  uniqueValueInfos: [
+    { value: "Public Parking", symbol: { type: "simple-fill", color: [34, 139, 34, 0.6] } }
+  ]
+};
+const tailgateLayer = new GeoJSONLayer({
+  url: "./data/Lindenwood_Tailgate_2026.geojson",
+  renderer: tailgateRenderer,
+  popupTemplate: template, // Original template
+  title: "Improved Layout"
+});
 
-  const harmonLayer = new GeoJSONLayer({
-    url: "./data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson",
-    popupTemplate: template,
-    renderer: lotRenderer,
-    visible: false,
-    title: "Harmon Lot"
-  });
+const heritageLayer = new GeoJSONLayer({
+  url: "./data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson",
+  renderer: heritageRenderer, // Use the new Heritage renderer
+  popupTemplate: heritageTemplate, // Create a template that uses Heritage fields
+  visible: false,
+  title: "Heritage Side"
+});
+
+const harmonLayer = new GeoJSONLayer({
+  url: "./data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson",
+  renderer: harmonRenderer, // Use the new Harmon renderer
+  popupTemplate: harmonTemplate,
+  visible: false,
+  title: "Harmon Lot"
+});
 
   const map = new Map({
     basemap: "topo-vector",
@@ -148,29 +175,29 @@
     zoom: 16,
     map: map
   });
-
-  view.when(() => {
-    const legend = new Legend({
-      view: view,
-      layerInfos: [
-        { layer: tailgateLayer, title: "Improved Layout" },
-        { layer: heritageLayer, title: "Heritage Side" },
-        { layer: harmonLayer, title: "Harmon Lot" }
-      ]
-    });
-
-    view.ui.add(legend, "bottom-left");
-
-    const toggle = (activeLayer) => {
-      [tailgateLayer, heritageLayer, harmonLayer].forEach(layer => {
-        layer.visible = (layer === activeLayer);
-      });
-    };
-
-    document.getElementById("primaryBtn").onclick = () => toggle(tailgateLayer);
-    document.getElementById("heritageBtn").onclick = () => toggle(heritageLayer);
-    document.getElementById("harmonBtn").onclick = () => toggle(harmonLayer);
+view.when(() => {
+  // Initialize legend with the first layer
+  const legend = new Legend({
+    view: view,
+    layerInfos: [{ layer: tailgateLayer, title: "Improved Layout" }]
   });
+  view.ui.add(legend, "bottom-left");
+
+  // Reusable function to switch maps and legends
+  function switchMap(activeLayer, title) {
+    [tailgateLayer, heritageLayer, harmonLayer].forEach(l => l.visible = (l === activeLayer));
+    
+    // This part updates the legend to only show the active map's categories
+    legend.layerInfos = [{
+      layer: activeLayer,
+      title: title
+    }];
+  }
+
+  document.getElementById("primaryBtn").onclick = () => switchMap(tailgateLayer, "Improved Layout");
+  document.getElementById("heritageBtn").onclick = () => switchMap(heritageLayer, "Heritage Side");
+  document.getElementById("harmonBtn").onclick = () => switchMap(harmonLayer, "Harmon Lot");
+});
 });
   </script>
 </body>
