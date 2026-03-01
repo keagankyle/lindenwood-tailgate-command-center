@@ -40,7 +40,6 @@
     <button onclick="document.getElementById('introModal').style.display='none'" style="background:#af935a; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">View Proposals</button>
   </div>
 </div>
-</div>
   <div id="sidebar">
     <h2 class="lu-gold">2026 Tailgate Center</h2>
     <p>Safety & Logistics Dashboard</p>
@@ -75,52 +74,48 @@ require([
       ]
     }]
   };
-
-  // 2. RENDERER: Assigns colors based on Parking_Type to mimic ArcGIS Pro
-  const lotRenderer = {
+const lotRenderer = {
     type: "unique-value",
     field: "Parking_Type",
     defaultSymbol: { type: "simple-fill", color: [175, 147, 90, 0.4], outline: { color: "white", width: 1 } },
     uniqueValueInfos: [
       {
         value: "Open Parking & Tailgate Lot",
-        symbol: { type: "simple-fill", color: [34, 139, 34, 0.5], outline: { color: "white", width: 1.5 } } // Green
+        symbol: { type: "simple-fill", color: [34, 139, 34, 0.5], outline: { color: "white", width: 1.5 } },
+        label: "Tailgate Allowed"
       },
+      // VARIANT 1: Correct spelling
       {
         value: "Parking ONLY - No Tailgating",
-        symbol: { type: "simple-fill", color: [175, 147, 90, 0.5], outline: { color: "white", width: 1 } } // LU Gold
+        symbol: { type: "simple-fill", color: [175, 147, 90, 0.6], outline: { color: "white", width: 1 } },
+        label: "Parking Only"
       },
+      // VARIANT 2: Missing space before "No"
+      {
+        value: "Parking ONLY- No Tailgating",
+        symbol: { type: "simple-fill", color: [175, 147, 90, 0.6], outline: { color: "white", width: 1 } },
+        label: "Parking Only"
+      },
+      // VARIANT 3: Trailing space at the end
+      {
+        value: "Parking ONLY - No Tailgating ",
+        symbol: { type: "simple-fill", color: [175, 147, 90, 0.6], outline: { color: "white", width: 1 } },
+        label: "Parking Only"
+      },
+      // STUDENT VARIANT 1: Standard
       {
         value: "Student Parking ONLY - NO Gameday Parking",
-        symbol: { type: "simple-fill", color: [220, 20, 60, 0.5], outline: { color: "white", width: 1 } } // Red/Restricted
+        symbol: { type: "simple-fill", color: [220, 20, 60, 0.5], outline: { color: "white", width: 1 } },
+        label: "Student Parking Only"
       },
-      // The "Correct" Version
-{
-  value: "Parking ONLY - No Tailgating",
-  symbol: { type: "simple-fill", color: "blue" },
-  label: "Parking Only" 
-},
-// FIX: Missing space before "No"
-{
-  value: "Parking ONLY- No Tailgating",
-  symbol: { type: "simple-fill", color: "blue" },
-  label: "Parking Only" // Keeping the label the same hides the error from the user
-},
-// FIX: Trailing space at the end
-{
-  value: "Parking ONLY - No Tailgating ",
-  symbol: { type: "simple-fill", color: "blue" },
-  label: "Parking Only"
-},
-// FIX: Different variant (Student Parking)
-{
-  value: "Student Parking ONLY- NO Gameday Parking",
-  symbol: { type: "simple-fill", color: "red" },
-  label: "Student Parking"
-}
+      // STUDENT VARIANT 2: Missing space
+      {
+        value: "Student Parking ONLY- NO Gameday Parking",
+        symbol: { type: "simple-fill", color: [220, 20, 60, 0.5], outline: { color: "white", width: 1 } },
+        label: "Student Parking Only"
+      }
     ]
   };
-
   // 3. LAYERS: Define all three layers
   const tailgateLayer = new GeoJSONLayer({
     url: "data/Lindenwood_Tailgate_2026.geojson",
