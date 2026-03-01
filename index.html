@@ -75,47 +75,78 @@ require([
     }]
   };
 const lotRenderer = {
-    type: "unique-value",
-    field: "Parking_Type",
-    defaultSymbol: { type: "simple-fill", color: [175, 147, 90, 0.4], outline: { color: "white", width: 1 } },
-    uniqueValueInfos: [
-      {
-        value: "Open Parking & Tailgate Lot",
-        symbol: { type: "simple-fill", color: [34, 139, 34, 0.5], outline: { color: "white", width: 1.5 } },
-        label: "Tailgate Allowed"
-      },
-      // VARIANT 1: Correct spelling
-      {
-        value: "Parking ONLY - No Tailgating",
-        symbol: { type: "simple-fill", color: [175, 147, 90, 0.6], outline: { color: "white", width: 1 } },
-        label: "Parking Only"
-      },
-      // VARIANT 2: Missing space before "No"
-      {
-        value: "Parking ONLY- No Tailgating",
-        symbol: { type: "simple-fill", color: [175, 147, 90, 0.6], outline: { color: "white", width: 1 } },
-        label: "Parking Only"
-      },
-      // VARIANT 3: Trailing space at the end
-      {
-        value: "Parking ONLY - No Tailgating ",
-        symbol: { type: "simple-fill", color: [175, 147, 90, 0.6], outline: { color: "white", width: 1 } },
-        label: "Parking Only"
-      },
-      // STUDENT VARIANT 1: Standard
-      {
-        value: "Student Parking ONLY - NO Gameday Parking",
-        symbol: { type: "simple-fill", color: [220, 20, 60, 0.5], outline: { color: "white", width: 1 } },
-        label: "Student Parking Only"
-      },
-      // STUDENT VARIANT 2: Missing space
-      {
-        value: "Student Parking ONLY- NO Gameday Parking",
-        symbol: { type: "simple-fill", color: [220, 20, 60, 0.5], outline: { color: "white", width: 1 } },
-        label: "Student Parking Only"
-      }
-    ]
-  };
+  type: "unique-value",
+  field: "Parking_Type",
+  defaultSymbol: {
+    type: "simple-fill",
+    color: [128, 128, 128, 0.4],
+    outline: { color: "white", width: 1 }
+  },
+  uniqueValueInfos: [
+    // GREEN - Open tailgating
+    { value: "Open Parking & Tailgate Lot",
+      symbol: { type: "simple-fill",
+        color: [34, 139, 34, 0.6],
+        outline: { color: "white", width: 1.5 } },
+      label: "Open Parking & Tailgate" },
+
+    // DARK GREEN - Tailgate only (no parking)
+    { value: "Tailgate Lot ONLY - No Parking",
+      symbol: { type: "simple-fill",
+        color: [0, 100, 0, 0.6],
+        outline: { color: "white", width: 1.5 } },
+      label: "Tailgate Only (No Parking)" },
+
+    // TEAL - Approved tailgate spots
+    { value: "Approved Tailgate Spots Only",
+      symbol: { type: "simple-fill",
+        color: [0, 128, 128, 0.6],
+        outline: { color: "white", width: 1.5 } },
+      label: "Approved Tailgate Spots" },
+
+    // GOLD - Parking only
+    { value: "Parking ONLY - No Tailgating",
+      symbol: { type: "simple-fill",
+        color: [175, 147, 90, 0.6],
+        outline: { color: "white", width: 1 } },
+      label: "Parking Only (No Tailgating)" },
+
+    // RED - Student restricted
+    { value: "Student Parking ONLY - NO Gameday Parking",
+      symbol: { type: "simple-fill",
+        color: [220, 20, 60, 0.5],
+        outline: { color: "white", width: 1 } },
+      label: "Student Only (Restricted)" },
+
+    // ORANGE - Opposing team
+    { value: "Opposing Team Parking/Tailgate",
+      symbol: { type: "simple-fill",
+        color: [255, 140, 0, 0.6],
+        outline: { color: "white", width: 1.5 } },
+      label: "Opposing Team Area" },
+
+    // BLUE - Handicap accessible
+    { value: "Handicap ",
+      symbol: { type: "simple-fill",
+        color: [30, 100, 200, 0.6],
+        outline: { color: "white", width: 2 } },
+      label: "Accessible Parking" },
+
+    // DARK GRAY - Public safety ops
+    { value: "Public Safety & Campus Operations",
+      symbol: { type: "simple-fill",
+        color: [80, 80, 80, 0.5],
+        outline: { color: "white", width: 1 } },
+      label: "Public Safety & Operations" },
+
+    // PURPLE - Football team
+    { value: "Football  Team Parking ONLY - NO Gameday Spectator Parking",
+      symbol: { type: "simple-fill",
+        color: [100, 50, 150, 0.6],
+        outline: { color: "white", width: 1 } },
+      label: "Team Parking Only" }
+  ]
+};
   // 3. LAYERS: Define all three layers
   const tailgateLayer = new GeoJSONLayer({
     url: "data/Lindenwood_Tailgate_2026.geojson",
