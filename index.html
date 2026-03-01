@@ -116,16 +116,16 @@ const lotRenderer = {
       label: "Team Parking Only" }
   ]
 };
-  // 3. LAYERS: Define all three layers
+  // 3. LAYERS: Define all three layers with absolute relative paths
   const tailgateLayer = new GeoJSONLayer({
-    url: "data/Lindenwood_Tailgate_2026.geojson",
+    url: "./data/Lindenwood_Tailgate_2026.geojson",
     popupTemplate: template,
     renderer: lotRenderer,
     title: "Improved Layout"
   });
 
   const heritageLayer = new GeoJSONLayer({
-    url: "data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson",
+    url: "./data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson",
     popupTemplate: template,
     renderer: lotRenderer,
     visible: false,
@@ -133,13 +133,12 @@ const lotRenderer = {
   });
 
   const harmonLayer = new GeoJSONLayer({
-    url: "data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson",
+    url: "./data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson",
     popupTemplate: template,
     renderer: lotRenderer,
     visible: false,
     title: "Harmon Lot"
   });
-
   const map = new Map({
     basemap: "topo-vector",
     layers: [tailgateLayer, heritageLayer, harmonLayer]
