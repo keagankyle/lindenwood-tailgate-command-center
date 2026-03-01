@@ -164,7 +164,16 @@ const lotRenderer = {
     zoom: 16,
     map: map
   });
-
+// Create the Legend widget
+  const legend = new Legend({
+    view: view,
+    layerInfos: [
+      {
+        layer: tailgateLayer,
+        title: "Lindenwood Tailgate Zones"
+      }
+    ]
+  });
   // 4. TOGGLE LOGIC: Controls visibility for all three maps
   view.when(() => {
     const toggle = (activeLayer) => {
