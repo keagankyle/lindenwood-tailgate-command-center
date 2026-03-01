@@ -93,7 +93,31 @@ require([
       {
         value: "Student Parking ONLY - NO Gameday Parking",
         symbol: { type: "simple-fill", color: [220, 20, 60, 0.5], outline: { color: "white", width: 1 } } // Red/Restricted
-      }
+      },
+      // The "Correct" Version
+{
+  value: "Parking ONLY - No Tailgating",
+  symbol: { type: "simple-fill", color: "blue" },
+  label: "Parking Only" 
+},
+// FIX: Missing space before "No"
+{
+  value: "Parking ONLY- No Tailgating",
+  symbol: { type: "simple-fill", color: "blue" },
+  label: "Parking Only" // Keeping the label the same hides the error from the user
+},
+// FIX: Trailing space at the end
+{
+  value: "Parking ONLY - No Tailgating ",
+  symbol: { type: "simple-fill", color: "blue" },
+  label: "Parking Only"
+},
+// FIX: Different variant (Student Parking)
+{
+  value: "Student Parking ONLY- NO Gameday Parking",
+  symbol: { type: "simple-fill", color: "red" },
+  label: "Student Parking"
+}
     ]
   };
 
