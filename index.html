@@ -4,10 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
   <title>Lindenwood Tailgate Command Center</title>
-  
   <link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css">
   <script src="https://js.arcgis.com/4.28/"></script>
-
   <style>
     html, body, #viewDiv { padding: 0; margin: 0; height: 100%; width: 100%; }
     #sidebar {
@@ -17,35 +15,22 @@
       z-index: 99; font-family: sans-serif;
     }
     .lu-gold { color: #af935a; font-weight: bold; }
-    button { 
-      width: 100%; margin-top: 5px; padding: 8px; 
-      cursor: pointer; border: 1px solid #ccc; border-radius: 4px; 
-    }
+    button { width: 100%; margin-top: 5px; padding: 8px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; }
     button:hover { background-color: #f0f0f0; }
   </style>
 </head>
 <body>
   <div id="introModal" style="position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center;">
-  <div style="background:white; padding:30px; border-radius:12px; max-width:500px; text-align:center; font-family:sans-serif;">
-    <h1 class="lu-gold">2026 Tailgate Proposals</h1>
-    <p>This project presents three distinct <strong>logistics proposals</strong> for the 2026 Lindenwood football tailgate season.</p>
-    <p>Please explore and compare the following proposed layouts:</p>
-    <ul style="text-align:left; display:inline-block; margin: 10px 0;">
-      <li><strong>Improved Layout:</strong> Optimized for modern traffic flow and safety.</li>
-      <li><strong>Heritage Side:</strong> Focuses on traditional campus areas.</li>
-      <li><strong>Harmon Lot:</strong> Concentrated tailgating near the Harmon facilities.</li>
-    </ul>
-    <hr>
-    <p style="font-size:0.9em;">Select a proposal from the sidebar to view specific parking configurations and access levels.</p>
-    <button onclick="document.getElementById('introModal').style.display='none'" style="background:#af935a; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">View Proposals</button>
+    <div style="background:white; padding:30px; border-radius:12px; max-width:500px; text-align:center; font-family:sans-serif;">
+      <h1 class="lu-gold">2026 Tailgate Proposals</h1>
+      <p>Explore the proposed layouts using the sidebar buttons.</p>
+      <button onclick="document.getElementById('introModal').style.display='none'" style="background:#af935a; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">View Proposals</button>
+    </div>
   </div>
-</div>
+
   <div id="sidebar">
     <h2 class="lu-gold">2026 Tailgate Center</h2>
-    <p>Safety & Logistics Dashboard</p>
-    <hr>
     <div id="layerToggle">
-      <p>Select Layout:</p>
       <button id="primaryBtn">Improved Layout</button>
       <button id="heritageBtn">Heritage Side</button>
       <button id="harmonBtn">Harmon Lot</button>
@@ -54,123 +39,115 @@
   <div id="viewDiv"></div>
 
   <script>
-   require([
-  "esri/Map",
-  "esri/views/MapView",
-  "esri/layers/GeoJSONLayer",
-  "esri/widgets/Legend"
-], function(Map, MapView, GeoJSONLayer, Legend) {
+    require([
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/layers/GeoJSONLayer",
+      "esri/widgets/Legend"
+    ], function(Map, MapView, GeoJSONLayer, Legend) {
 
-  // --- 1. RENDERERS ---
+      // --- RENDERERS ---
 
-  // Organized by Lot_Name for "Parking & Tailgate Lots"
-  const lotRenderer = {
-    type: "unique-value",
-    field: "Lot_Name",
-    defaultSymbol: { type: "simple-fill", color: [128, 128, 128, 0.4], outline: { color: "white", width: 1 } },
-    uniqueValueInfos: [
-      { value: "Lot A", symbol: { type: "simple-fill", color: "#af935a" }, label: "Lot A" },
-      { value: "Lot B", symbol: { type: "simple-fill", color: "#228b22" }, label: "Lot B" },
-      { value: "Lot C", symbol: { type: "simple-fill", color: "#006400" }, label: "Lot C" },
-      { value: "Accessible Parking", symbol: { type: "simple-fill", color: [30, 100, 200, 0.6] }, label: "Accessible Parking" },
-      { value: "Public Parking", symbol: { type: "simple-fill", color: [175, 147, 90, 0.6] }, label: "Public Parking" },
-      { value: "Restricted", symbol: { type: "simple-fill", color: [220, 20, 60, 0.5] }, label: "Restricted" }
-    ]
-  };
+      // This pulls from the "Lot_Name" property in your GeoJSON
+      const lotRenderer = {
+        type: "unique-value",
+        field: "Lot_Name", 
+        uniqueValueInfos: [
+          { value: "Lot A", symbol: { type: "simple-fill", color: [175, 147, 90, 0.6], outline: { color: "white", width: 1 } }, label: "Lot A" },
+          { value: "Lot B", symbol: { type: "simple-fill", color: [34, 139, 34, 0.6], outline: { color: "white", width: 1 } }, label: "Lot B" },
+          { value: "Lot C", symbol: { type: "simple-fill", color: [0, 100, 0, 0.6], outline: { color: "white", width: 1 } }, label: "Lot C" },
+          { value: "Accessible Parking", symbol: { type: "simple-fill", color: [30, 100, 200, 0.6], outline: { color: "white", width: 1 } }, label: "Accessible Parking" },
+          { value: "Public Parking", symbol: { type: "simple-fill", color: [100, 100, 100, 0.5], outline: { color: "white", width: 1 } }, label: "Public Parking" },
+          { value: "Restricted", symbol: { type: "simple-fill", color: [220, 20, 60, 0.5], outline: { color: "white", width: 1 } }, label: "Restricted" }
+        ]
+      };
 
-  // Organized by Zone_Name for "Specialized Zones"
-  const zoneRenderer = {
-    type: "unique-value",
-    field: "Zone_Name",
-    defaultSymbol: { type: "simple-fill", color: [100, 100, 100, 0.2], outline: { color: "white" } },
-    uniqueValueInfos: [
-      { value: "Accessible Parking", symbol: { type: "simple-fill", color: [30, 100, 200, 0.4] }, label: "Accessible Parking" },
-      { value: "Lion Pride Tailgate", symbol: { type: "simple-fill", color: [175, 147, 90, 0.7] }, label: "Lion Pride Tailgate" },
-      { value: "End Zone Club", symbol: { type: "simple-fill", color: [0, 100, 0, 0.7] }, label: "End Zone Club" },
-      { value: "Staff & Faculty Area", symbol: { type: "simple-fill", color: [100, 50, 150, 0.6] }, label: "Staff & Faculty Area" }
-    ]
-  };
+      // This pulls from the "Zone_Name" property in your GeoJSON
+      const zoneRenderer = {
+        type: "unique-value",
+        field: "Zone_Name",
+        uniqueValueInfos: [
+          { value: "Accessible Parking", symbol: { type: "simple-fill", color: [30, 100, 200, 0.4], outline: { color: "white", width: 2 } }, label: "Accessible Zone" },
+          { value: "Lion Pride Tailgate", symbol: { type: "simple-fill", color: [175, 147, 90, 0.8], outline: { color: "white", width: 2 } }, label: "Lion Pride Tailgate" },
+          { value: "End Zone Club", symbol: { type: "simple-fill", color: [0, 100, 0, 0.8], outline: { color: "white", width: 2 } }, label: "End Zone Club" },
+          { value: "Staff & Faculty Area", symbol: { type: "simple-fill", color: [100, 50, 150, 0.6], outline: { color: "white", width: 2 } }, label: "Staff & Faculty Area" }
+        ]
+      };
 
-  // --- 2. LAYERS ---
+      // --- LAYERS ---
 
-  const tailgateLayer = new GeoJSONLayer({
-    url: "./data/Lindenwood_Tailgate_2026.geojson",
-    renderer: lotRenderer,
-    title: "Parking & Tailgate Lots",
-    outFields: ["*"]
-  });
-
-  const specializedLayer = new GeoJSONLayer({
-    url: "./data/Lindenwood_Tailgate_2026.geojson",
-    renderer: zoneRenderer,
-    title: "Specialized Zones",
-    outFields: ["*"]
-  });
-
-  const heritageLayer = new GeoJSONLayer({
-    url: "./data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson",
-    visible: false,
-    title: "Heritage Side"
-  });
-
-  const harmonLayer = new GeoJSONLayer({
-    url: "./data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson",
-    visible: false,
-    title: "Harmon Lot"
-  });
-
-  const map = new Map({
-    basemap: "topo-vector",
-    layers: [tailgateLayer, specializedLayer, heritageLayer, harmonLayer]
-  });
-
-  const view = new MapView({
-    container: "viewDiv",
-    center: [-90.503, 38.786],
-    zoom: 16,
-    map: map
-  });
-
-  // --- 3. DYNAMIC LEGEND & TOGGLE LOGIC ---
-
-  view.when(() => {
-    const legend = new Legend({ view: view });
-    view.ui.add(legend, "bottom-left");
-
-    // Set initial legend for Improved Map
-    legend.layerInfos = [
-      { layer: tailgateLayer, title: "Parking & Tailgate Lots" },
-      { layer: specializedLayer, title: "Specialized Zones" }
-    ];
-
-    function switchProposal(activeLayers, legendInfos) {
-      // Toggle visibility for all layers
-      [tailgateLayer, specializedLayer, heritageLayer, harmonLayer].forEach(layer => {
-        layer.visible = activeLayers.includes(layer);
+      const tailgateLayer = new GeoJSONLayer({
+        url: "./data/Lindenwood_Tailgate_2026.geojson",
+        renderer: lotRenderer,
+        title: "Parking & Tailgate Lots",
+        outFields: ["*"]
       });
-      // Update legend entries
-      legend.layerInfos = legendInfos;
-    }
 
-    document.getElementById("primaryBtn").onclick = () => switchProposal(
-      [tailgateLayer, specializedLayer],
-      [
-        { layer: tailgateLayer, title: "Parking & Tailgate Lots" },
-        { layer: specializedLayer, title: "Specialized Zones" }
-      ]
-    );
+      const specializedLayer = new GeoJSONLayer({
+        url: "./data/Lindenwood_Tailgate_2026.geojson",
+        renderer: zoneRenderer,
+        title: "Specialized Zones",
+        outFields: ["*"]
+      });
 
-    document.getElementById("heritageBtn").onclick = () => switchProposal(
-      [heritageLayer],
-      [{ layer: heritageLayer, title: "Heritage Side" }]
-    );
+      const heritageLayer = new GeoJSONLayer({
+        url: "./data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson",
+        visible: false,
+        title: "Heritage Side"
+      });
 
-    document.getElementById("harmonBtn").onclick = () => switchProposal(
-      [harmonLayer],
-      [{ layer: harmonLayer, title: "Harmon Lot" }]
-    );
-  });
-});
+      const harmonLayer = new GeoJSONLayer({
+        url: "./data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson",
+        visible: false,
+        title: "Harmon Lot"
+      });
+
+      const map = new Map({
+        basemap: "topo-vector",
+        layers: [tailgateLayer, specializedLayer, heritageLayer, harmonLayer]
+      });
+
+      const view = new MapView({
+        container: "viewDiv",
+        center: [-90.503, 38.786],
+        zoom: 16,
+        map: map
+      });
+
+      view.when(() => {
+        const legend = new Legend({ view: view });
+        view.ui.add(legend, "bottom-left");
+
+        // Initial Legend Setup
+        legend.layerInfos = [
+          { layer: tailgateLayer, title: "Parking & Tailgate Lots" },
+          { layer: specializedLayer, title: "Specialized Zones" }
+        ];
+
+        function switchProposal(activeLayers, legendInfos) {
+          [tailgateLayer, specializedLayer, heritageLayer, harmonLayer].forEach(layer => {
+            layer.visible = activeLayers.includes(layer);
+          });
+          legend.layerInfos = legendInfos;
+        }
+
+        document.getElementById("primaryBtn").onclick = () => switchProposal(
+          [tailgateLayer, specializedLayer],
+          [
+            { layer: tailgateLayer, title: "Parking & Tailgate Lots" },
+            { layer: specializedLayer, title: "Specialized Zones" }
+          ]
+        );
+
+        document.getElementById("heritageBtn").onclick = () => switchProposal(
+          [heritageLayer], [{ layer: heritageLayer, title: "Heritage Side" }]
+        );
+
+        document.getElementById("harmonBtn").onclick = () => switchProposal(
+          [harmonLayer], [{ layer: harmonLayer, title: "Harmon Lot" }]
+        );
+      });
+    });
   </script>
 </body>
 </html>
