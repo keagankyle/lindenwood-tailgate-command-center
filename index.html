@@ -40,114 +40,128 @@
 
   <script>
     require([
-      "esri/Map",
-      "esri/views/MapView",
-      "esri/layers/GeoJSONLayer",
-      "esri/widgets/Legend"
-    ], function(Map, MapView, GeoJSONLayer, Legend) {
+  "esri/Map",
+  "esri/views/MapView",
+  "esri/layers/GeoJSONLayer",
+  "esri/widgets/Legend"
+], function(Map, MapView, GeoJSONLayer, Legend) {
 
-      // --- RENDERERS ---
+  // --- POPUP TEMPLATE ---
+  const tailgateTemplate = {
+    title: "{Lot_Name}",
+    content: [{
+      type: "fields",
+      fieldInfos: [
+        { fieldName: "Lot_Name", label: "Lot Name" },
+        { fieldName: "Parking_Type", label: "Type" },
+        { fieldName: "Opening_Time", label: "Opens" },
+        { fieldName: "Permit_Required", label: "Permit Required?" }
+      ]
+    }]
+  };
 
-      // This pulls from the "Lot_Name" property in your GeoJSON
-      const lotRenderer = {
-        type: "unique-value",
-        field: "Lot_Name", 
-        uniqueValueInfos: [
-          { value: "Lot A", symbol: { type: "simple-fill", color: [175, 147, 90, 0.6], outline: { color: "white", width: 1 } }, label: "Lot A" },
-          { value: "Lot B", symbol: { type: "simple-fill", color: [34, 139, 34, 0.6], outline: { color: "white", width: 1 } }, label: "Lot B" },
-          { value: "Lot C", symbol: { type: "simple-fill", color: [0, 100, 0, 0.6], outline: { color: "white", width: 1 } }, label: "Lot C" },
-          { value: "Accessible Parking", symbol: { type: "simple-fill", color: [30, 100, 200, 0.6], outline: { color: "white", width: 1 } }, label: "Accessible Parking" },
-          { value: "Public Parking", symbol: { type: "simple-fill", color: [100, 100, 100, 0.5], outline: { color: "white", width: 1 } }, label: "Public Parking" },
-          { value: "Restricted", symbol: { type: "simple-fill", color: [220, 20, 60, 0.5], outline: { color: "white", width: 1 } }, label: "Restricted" }
-        ]
-      };
+  // --- RENDERERS ---
 
-      // This pulls from the "Zone_Name" property in your GeoJSON
-      const zoneRenderer = {
-        type: "unique-value",
-        field: "Zone_Name",
-        uniqueValueInfos: [
-          { value: "Accessible Parking", symbol: { type: "simple-fill", color: [30, 100, 200, 0.4], outline: { color: "white", width: 2 } }, label: "Accessible Zone" },
-          { value: "Lion Pride Tailgate", symbol: { type: "simple-fill", color: [175, 147, 90, 0.8], outline: { color: "white", width: 2 } }, label: "Lion Pride Tailgate" },
-          { value: "End Zone Club", symbol: { type: "simple-fill", color: [0, 100, 0, 0.8], outline: { color: "white", width: 2 } }, label: "End Zone Club" },
-          { value: "Staff & Faculty Area", symbol: { type: "simple-fill", color: [100, 50, 150, 0.6], outline: { color: "white", width: 2 } }, label: "Staff & Faculty Area" }
-        ]
-      };
+  // Organizes based on Lot_Name
+  const lotRenderer = {
+    type: "unique-value",
+    field: "Lot_Name",
+    defaultSymbol: { type: "simple-fill", color: [128, 128, 128, 0.4], outline: { color: "white", width: 1 } },
+    uniqueValueInfos: [
+      { value: "Lot A", symbol: { type: "simple-fill", color: "#af935a" }, label: "Lot A" },
+      { value: "Lot B", symbol: { type: "simple-fill", color: "#228b22" }, label: "Lot B" },
+      { value: "Lot C", symbol: { type: "simple-fill", color: "#006400" }, label: "Lot C" },
+      { value: "Accessible Parking", symbol: { type: "simple-fill", color: [30, 100, 200, 0.6] }, label: "Accessible Parking" },
+      { value: "Public Parking", symbol: { type: "simple-fill", color: [175, 147, 90, 0.6] }, label: "Public Parking" },
+      { value: "Restricted", symbol: { type: "simple-fill", color: [220, 20, 60, 0.5] }, label: "Restricted" }
+    ]
+  };
 
-      // --- LAYERS ---
+  // Organizes based on Parking_Type (replacing missing Zone_Name)
+  const zoneRenderer = {
+    type: "unique-value",
+    field: "Parking_Type", 
+    defaultSymbol: { type: "simple-fill", color: [100, 100, 100, 0.2], outline: { color: "white" } },
+    uniqueValueInfos: [
+      { value: "Handicap", symbol: { type: "simple-fill", color: [30, 100, 200, 0.4] }, label: "Accessible Parking" },
+      { value: "Open Parking & Tailgate Lot", symbol: { type: "simple-fill", color: [175, 147, 90, 0.7] }, label: "Lion Pride Tailgate" },
+      { value: "Tailgate Lot ONLY - No Parking", symbol: { type: "simple-fill", color: [0, 100, 0, 0.7] }, label: "End Zone Club" },
+      { value: "Staff & Faculty Area", symbol: { type: "simple-fill", color: [100, 50, 150, 0.6] }, label: "Staff & Faculty Area" }
+    ]
+  };
 
-      const tailgateLayer = new GeoJSONLayer({
-        url: "./data/Lindenwood_Tailgate_2026.geojson",
-        renderer: lotRenderer,
-        title: "Parking & Tailgate Lots",
-        outFields: ["*"]
+  // --- LAYERS ---
+  const tailgateLayer = new GeoJSONLayer({
+    url: "./data/Lindenwood_Tailgate_2026.geojson",
+    renderer: lotRenderer,
+    popupTemplate: tailgateTemplate, // Enable Pop-ups
+    title: "Parking & Tailgate Lots"
+  });
+
+  const specializedLayer = new GeoJSONLayer({
+    url: "./data/Lindenwood_Tailgate_2026.geojson",
+    renderer: zoneRenderer,
+    popupTemplate: tailgateTemplate, // Enable Pop-ups
+    title: "Specialized Zones"
+  });
+
+  // Other proposals
+  const heritageLayer = new GeoJSONLayer({
+    url: "./data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson",
+    visible: false,
+    popupTemplate: tailgateTemplate,
+    title: "Heritage Side"
+  });
+
+  const harmonLayer = new GeoJSONLayer({
+    url: "./data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson",
+    visible: false,
+    popupTemplate: tailgateTemplate,
+    title: "Harmon Lot"
+  });
+
+  const map = new Map({
+    basemap: "topo-vector",
+    layers: [tailgateLayer, specializedLayer, heritageLayer, harmonLayer]
+  });
+
+  const view = new MapView({
+    container: "viewDiv",
+    center: [-90.503, 38.786],
+    zoom: 16,
+    map: map
+  });
+
+  view.when(() => {
+    const legend = new Legend({ view: view });
+    view.ui.add(legend, "bottom-left");
+
+    legend.layerInfos = [
+      { layer: tailgateLayer, title: "Parking & Tailgate Lots" },
+      { layer: specializedLayer, title: "Specialized Zones" }
+    ];
+
+    function switchProposal(activeLayers, legendInfos) {
+      [tailgateLayer, specializedLayer, heritageLayer, harmonLayer].forEach(layer => {
+        layer.visible = activeLayers.includes(layer);
       });
+      legend.layerInfos = legendInfos;
+    }
 
-      const specializedLayer = new GeoJSONLayer({
-        url: "./data/Lindenwood_Tailgate_2026.geojson",
-        renderer: zoneRenderer,
-        title: "Specialized Zones",
-        outFields: ["*"]
-      });
+    document.getElementById("primaryBtn").onclick = () => switchProposal(
+      [tailgateLayer, specializedLayer],
+      [{ layer: tailgateLayer, title: "Parking & Tailgate Lots" }, { layer: specializedLayer, title: "Specialized Zones" }]
+    );
 
-      const heritageLayer = new GeoJSONLayer({
-        url: "./data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson",
-        visible: false,
-        title: "Heritage Side"
-      });
+    document.getElementById("heritageBtn").onclick = () => switchProposal(
+      [heritageLayer], [{ layer: heritageLayer, title: "Heritage Side" }]
+    );
 
-      const harmonLayer = new GeoJSONLayer({
-        url: "./data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson",
-        visible: false,
-        title: "Harmon Lot"
-      });
-
-      const map = new Map({
-        basemap: "topo-vector",
-        layers: [tailgateLayer, specializedLayer, heritageLayer, harmonLayer]
-      });
-
-      const view = new MapView({
-        container: "viewDiv",
-        center: [-90.503, 38.786],
-        zoom: 16,
-        map: map
-      });
-
-      view.when(() => {
-        const legend = new Legend({ view: view });
-        view.ui.add(legend, "bottom-left");
-
-        // Initial Legend Setup
-        legend.layerInfos = [
-          { layer: tailgateLayer, title: "Parking & Tailgate Lots" },
-          { layer: specializedLayer, title: "Specialized Zones" }
-        ];
-
-        function switchProposal(activeLayers, legendInfos) {
-          [tailgateLayer, specializedLayer, heritageLayer, harmonLayer].forEach(layer => {
-            layer.visible = activeLayers.includes(layer);
-          });
-          legend.layerInfos = legendInfos;
-        }
-
-        document.getElementById("primaryBtn").onclick = () => switchProposal(
-          [tailgateLayer, specializedLayer],
-          [
-            { layer: tailgateLayer, title: "Parking & Tailgate Lots" },
-            { layer: specializedLayer, title: "Specialized Zones" }
-          ]
-        );
-
-        document.getElementById("heritageBtn").onclick = () => switchProposal(
-          [heritageLayer], [{ layer: heritageLayer, title: "Heritage Side" }]
-        );
-
-        document.getElementById("harmonBtn").onclick = () => switchProposal(
-          [harmonLayer], [{ layer: harmonLayer, title: "Harmon Lot" }]
-        );
-      });
-    });
+    document.getElementById("harmonBtn").onclick = () => switchProposal(
+      [harmonLayer], [{ layer: harmonLayer, title: "Harmon Lot" }]
+    );
+  });
+});
   </script>
 </body>
 </html>
