@@ -156,6 +156,7 @@
         url: heritageUrl,
         title: "Parking Lots",
         renderer: heritageParkingRenderer,
+        // Match specific Lot_Names in Heritage Side GeoJSON
         definitionExpression: "Lot_Name IN ('Public Parking', 'Accessible Parking', 'VIP Parking')",
         popupTemplate: tailgateTemplate,
         visible: false
@@ -164,7 +165,7 @@
       const hTailgate = new GeoJSONLayer({
         url: heritageUrl,
         title: "Tailgating Zones",
-        renderer: heritageTailgateRenderer,
+        // Match specific Zone_Types in Heritage Side GeoJSON
         definitionExpression: "Zone_Type IN ('Zone A', 'Zone B', 'Zone C')",
         popupTemplate: tailgateTemplate,
         visible: false
@@ -174,6 +175,7 @@
         url: heritageUrl,
         title: "Specialized Zones",
         renderer: heritageSpecializedRenderer,
+        // Match specialized Zone_Type in Heritage Side GeoJSON
         definitionExpression: "Zone_Type = 'Lion Pride Tailgate'",
         popupTemplate: tailgateTemplate,
         visible: false
@@ -183,6 +185,7 @@
         url: heritageUrl,
         title: "Restricted Lots",
         renderer: heritageRestrictedRenderer,
+        // Match restricted Lot_Name in Heritage Side GeoJSON
         definitionExpression: "Lot_Name = 'Restricted Lot'",
         popupTemplate: tailgateTemplate,
         visible: false
