@@ -60,7 +60,6 @@
       };
 
       // --- RENDERERS ---
-
       const lotRenderer = {
         type: "unique-value",
         field: "Lot_Name",
@@ -123,7 +122,6 @@
         ]
       };
 
-      // --- NEW HARMON RENDERERS ---
       const harmonParkingRenderer = {
         type: "unique-value",
         field: "Lot_Name",
@@ -208,7 +206,6 @@
         visible: false
       });
 
-      // --- NEW HARMON LAYERS ---
       const harmonUrl = "./data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson";
 
       const harmonParking = new GeoJSONLayer({
@@ -269,7 +266,6 @@
         });
         view.ui.add(legend, "bottom-left");
 
-        // FIXED: Now includes all 10 specific layers and no non-existent 'harmonLayer'
         function switchProposal(activeLayers, legendInfos) {
           const allLayers = [
             tailgateLayer, specializedLayer, 
