@@ -136,34 +136,47 @@ const harmonLayer = new GeoJSONLayer({
   });
 
   view.when(() => {
-    const legend = new Legend({ view: view });
+    // Initialize Legend
+    const legend = new Legend({ 
+        view: view,
+        // Optional: Only show legend items for features currently on screen
+        hideLayersNotInCurrentView: true 
+    });
     view.ui.add(legend, "bottom-left");
 
-    legend.layerInfos = [
-      { layer: tailgateLayer, title: "Parking & Tailgate Lots" },
-      { layer: specializedLayer, title: "Specialized Zones" }
-    ];
-
+    // Unified function to swap layers AND update the Legend
     function switchProposal(activeLayers, legendInfos) {
-      [tailgateLayer, specializedLayer, heritageLayer, harmonLayer].forEach(layer => {
-        layer.visible = activeLayers.includes(layer);
-      });
-      legend.layerInfos = legendInfos;
+        // 1. Toggle Layer Visibility
+        [tailgateLayer, specializedLayer, heritageLayer, harmonLayer].forEach(layer => {
+            layer.visible = activeLayers.includes(layer);
+        });
+
+        // 2. Update the Legend to match the new selection
+        legend.layerInfos = legendInfos;
     }
 
+    // --- BUTTON ACTIONS ---
+
+    // Improved Layout (Shows both Parking and Specialized layers)
     document.getElementById("primaryBtn").onclick = () => switchProposal(
-      [tailgateLayer, specializedLayer],
-      [{ layer: tailgateLayer, title: "Parking & Tailgate Lots" }, { layer: specializedLayer, title: "Specialized Zones" }]
+        [tailgateLayer, specializedLayer],
+        [
+            { layer: tailgateLayer, title: "Parking & Tailgate Lots" },
+            { layer: specializedLayer, title: "Specialized Zones" }
+        ]
     );
 
+    // Heritage Side
     document.getElementById("heritageBtn").onclick = () => switchProposal(
-      [heritageLayer], [{ layer: heritageLayer, title: "Heritage Side" }]
+        [heritageLayer], 
+        [{ layer: heritageLayer, title: "Heritage Side Layout" }]
     );
 
+    // Harmon Lot
     document.getElementById("harmonBtn").onclick = () => switchProposal(
-      [harmonLayer], [{ layer: harmonLayer, title: "Harmon Lot" }]
+        [harmonLayer], 
+        [{ layer: harmonLayer, title: "Harmon Lot Layout" }]
     );
-  });
 });
   </script>
 </body>
