@@ -74,7 +74,6 @@
         ]
       };
 
-      // Updated Heritage Parking Renderer
       const heritageParkingRenderer = {
         type: "unique-value",
         field: "Lot_Name",
@@ -85,7 +84,6 @@
         ]
       };
 
-      // Updated Heritage Tailgate Renderer
       const heritageTailgateRenderer = {
         type: "unique-value",
         field: "Zone_Type",
@@ -96,21 +94,23 @@
         ]
       };
 
-      // Updated Heritage Specialized Renderer
+      // FIXED: Added partial matching support for Specialized Zones
       const heritageSpecializedRenderer = {
         type: "unique-value",
         field: "Zone_Type",
+        defaultSymbol: { type: "simple-fill", color: "#FFD700" }, // Fallback color
         uniqueValueInfos: [
-          { value: "Lion Pride Tailgate", symbol: { type: "simple-fill", color: "#FFD700" }, label: "Lion Pride Tailgate (Vendors & Entertainment)" }
+          { value: "Lion Pride Tailgate", symbol: { type: "simple-fill", color: "#FFD700" }, label: "Lion Pride Tailgate" }
         ]
       };
 
-      // Updated Heritage Restricted Renderer
+      // FIXED: Added partial matching support for Restricted Lots
       const heritageRestrictedRenderer = {
         type: "unique-value",
         field: "Lot_Name",
+        defaultSymbol: { type: "simple-fill", color: [255, 0, 0, 0.6] }, // Fallback color
         uniqueValueInfos: [
-          { value: "Restricted Lot", symbol: { type: "simple-fill", color: [255, 0, 0, 0.6] }, label: "Restricted Lot" }
+          { value: "Restricted Lot", symbol: { type: "simple-fill", color: [255, 0, 0, 0.6] }, label: "Restricted Area" }
         ]
       };
 
@@ -156,8 +156,7 @@
         url: heritageUrl,
         title: "Parking Lots",
         renderer: heritageParkingRenderer,
-        // Match specific Lot_Names in Heritage Side GeoJSON
-        definitionExpression: "Lot_Name IN ('Public Parking', 'Accessible Parking', 'VIP Parking')",
+        definitionExpression: "Lot_Name LIKE '%Parking%'",
         popupTemplate: tailgateTemplate,
         visible: false
       });
@@ -165,8 +164,8 @@
       const hTailgate = new GeoJSONLayer({
         url: heritageUrl,
         title: "Tailgating Zones",
-        // Match specific Zone_Types in Heritage Side GeoJSON
-        definitionExpression: "Zone_Type IN ('Zone A', 'Zone B', 'Zone C')",
+        renderer: heritageTailgateRenderer,
+        definitionExpression: "Zone_Type LIKE 'Zone %'",
         popupTemplate: tailgateTemplate,
         visible: false
       });
@@ -175,8 +174,8 @@
         url: heritageUrl,
         title: "Specialized Zones",
         renderer: heritageSpecializedRenderer,
-        // Match specialized Zone_Type in Heritage Side GeoJSON
-        definitionExpression: "Zone_Type = 'Lion Pride Tailgate'",
+        // FIXED: Using LIKE to find the zone even if the name is slightly different in the file
+        definitionExpression: "Zone_Type LIKE '%Lion Pride%'",
         popupTemplate: tailgateTemplate,
         visible: false
       });
@@ -185,8 +184,8 @@
         url: heritageUrl,
         title: "Restricted Lots",
         renderer: heritageRestrictedRenderer,
-        // Match restricted Lot_Name in Heritage Side GeoJSON
-        definitionExpression: "Lot_Name = 'Restricted Lot'",
+        // FIXED: Using LIKE to find any lot named 'Restricted'
+        definitionExpression: "Lot_Name LIKE '%Restricted%'",
         popupTemplate: tailgateTemplate,
         visible: false
       });
