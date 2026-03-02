@@ -46,6 +46,7 @@
       "esri/widgets/Legend"
     ], function(Map, MapView, GeoJSONLayer, Legend) {
 
+      // Define the Pop-up Template for all layers
       const tailgateTemplate = {
         title: "{Lot_Name}",
         content: [{
@@ -59,55 +60,38 @@
         }]
       };
 
-      // --- RENDERERS ---
-      const lotRenderer = {
-        type: "unique-value",
-        field: "Lot_Name",
-        defaultSymbol: { type: "simple-fill", color: [128, 128, 128, 0.4], outline: { color: "white", width: 1 } },
-        uniqueValueInfos: [
-          { value: "Lot A", symbol: { type: "simple-fill", color: "#af935a" }, label: "Lot A" },
-          { value: "Lot B", symbol: { type: "simple-fill", color: "#228b22" }, label: "Lot B" },
-          { value: "Lot C", symbol: { type: "simple-fill", color: "#006400" }, label: "Lot C" },
-          { value: "Accessible Parking", symbol: { type: "simple-fill", color: [30, 100, 200, 0.6] }, label: "Accessible Parking" },
-          { value: "Public Parking", symbol: { type: "simple-fill", color: [175, 147, 90, 0.6] }, label: "Public Parking" }
-        ]
-      };
-
-      const zoneRenderer = {
-        type: "unique-value",
-        field: "Parking_Type",
-        defaultSymbol: { type: "simple-fill", color: [100, 100, 100, 0.2], outline: { color: "white" } },
-        uniqueValueInfos: [
-          { value: "Handicap", symbol: { type: "simple-fill", color: [30, 100, 200, 0.4] }, label: "Accessible Parking" },
-          { value: "Open Parking & Tailgate Lot", symbol: { type: "simple-fill", color: [175, 147, 90, 0.7] }, label: "Lion Pride Tailgate" },
-          { value: "Tailgate Lot ONLY - No Parking", symbol: { type: "simple-fill", color: [0, 100, 0, 0.7] }, label: "End Zone Club" }
-        ]
-      };
-
       // --- LAYERS ---
+      // Improved Layout Layers
       const tailgateLayer = new GeoJSONLayer({
         url: "./data/Lindenwood_Tailgate_2026.geojson",
-        renderer: lotRenderer,
         popupTemplate: tailgateTemplate,
         title: "Parking & Tailgate Lots",
         visible: true
       });
-
       const specializedLayer = new GeoJSONLayer({
         url: "./data/Lindenwood_Tailgate_2026.geojson",
-        renderer: zoneRenderer,
         popupTemplate: tailgateTemplate,
         visible: true,
         title: "Specialized Zones"
       });
 
+      // Heritage Layers - Added popupTemplate to fix the issue
       const heritageUrl = "./data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson";
-      const hParking = new GeoJSONLayer({ url: heritageUrl, title: "Heritage Parking", visible: false });
-      const hTailgate = new GeoJSONLayer({ url: heritageUrl, title: "Heritage Tailgate", visible: false });
+      const hParking = new GeoJSONLayer({ 
+        url: heritageUrl, title: "Heritage Parking", visible: false, popupTemplate: tailgateTemplate 
+      });
+      const hTailgate = new GeoJSONLayer({ 
+        url: heritageUrl, title: "Heritage Tailgate", visible: false, popupTemplate: tailgateTemplate 
+      });
 
+      // Harmon Layers - Added popupTemplate to fix the issue
       const harmonUrl = "./data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson";
-      const harmonParking = new GeoJSONLayer({ url: harmonUrl, title: "Harmon Parking", visible: false });
-      const harmonTailgate = new GeoJSONLayer({ url: harmonUrl, title: "Harmon Tailgate", visible: false });
+      const harmonParking = new GeoJSONLayer({ 
+        url: harmonUrl, title: "Harmon Parking", visible: false, popupTemplate: tailgateTemplate 
+      });
+      const harmonTailgate = new GeoJSONLayer({ 
+        url: harmonUrl, title: "Harmon Tailgate", visible: false, popupTemplate: tailgateTemplate 
+      });
 
       const map = new Map({
         basemap: "topo-vector",
@@ -125,15 +109,27 @@
         const legend = new Legend({ view: view });
         view.ui.add(legend, "bottom-left");
 
+        // Updated function to handle Legend Info dynamically
         function switchProposal(activeLayers) {
-          [tailgateLayer, specializedLayer, hParking, hTailgate, harmonParking, harmonTailgate].forEach(layer => {
+          const allLayers = [tailgateLayer, specializedLayer, hParking, hTailgate, harmonParking, harmonTailgate];
+          
+          allLayers.forEach(layer => {
             layer.visible = activeLayers.includes(layer);
+          });
+
+          // Refresh legend to show only active proposal layers
+          legend.layerInfos = activeLayers.map(layer => {
+            return { layer: layer, title: layer.title };
           });
         }
 
+        // Button Assignments
         document.getElementById("primaryBtn").onclick = () => switchProposal([tailgateLayer, specializedLayer]);
         document.getElementById("heritageBtn").onclick = () => switchProposal([hParking, hTailgate]);
         document.getElementById("harmonBtn").onclick = () => switchProposal([harmonParking, harmonTailgate]);
+        
+        // Ensure initial legend and map state are correct
+        switchProposal([tailgateLayer, specializedLayer]);
       });
     });
   </script>
