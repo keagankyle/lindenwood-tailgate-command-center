@@ -46,7 +46,7 @@
       "esri/widgets/Legend"
     ], function(Map, MapView, GeoJSONLayer, Legend) {
 
-      // Define the Pop-up Template for all layers
+      // Reusable Template for all layers
       const tailgateTemplate = {
         title: "{Lot_Name}",
         content: [{
@@ -60,8 +60,14 @@
         }]
       };
 
+      // --- RENDERERS (simplified for functionality) ---
+      const genericRenderer = {
+        type: "simple",
+        symbol: { type: "simple-fill", color: [175, 147, 90, 0.6], outline: { color: "white", width: 1 } }
+      };
+
       // --- LAYERS ---
-      // Improved Layout Layers
+      // Improved Layout
       const tailgateLayer = new GeoJSONLayer({
         url: "./data/Lindenwood_Tailgate_2026.geojson",
         popupTemplate: tailgateTemplate,
@@ -75,7 +81,7 @@
         title: "Specialized Zones"
       });
 
-      // Heritage Layers - Added popupTemplate to fix the issue
+      // Heritage Layers
       const heritageUrl = "./data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson";
       const hParking = new GeoJSONLayer({ 
         url: heritageUrl, title: "Heritage Parking", visible: false, popupTemplate: tailgateTemplate 
@@ -84,7 +90,7 @@
         url: heritageUrl, title: "Heritage Tailgate", visible: false, popupTemplate: tailgateTemplate 
       });
 
-      // Harmon Layers - Added popupTemplate to fix the issue
+      // Harmon Layers
       const harmonUrl = "./data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson";
       const harmonParking = new GeoJSONLayer({ 
         url: harmonUrl, title: "Harmon Parking", visible: false, popupTemplate: tailgateTemplate 
@@ -106,10 +112,11 @@
       });
 
       view.when(() => {
+        // Initialize Legend
         const legend = new Legend({ view: view });
         view.ui.add(legend, "bottom-left");
 
-        // Updated function to handle Legend Info dynamically
+        // Function to toggle layers AND update the Legend display
         function switchProposal(activeLayers) {
           const allLayers = [tailgateLayer, specializedLayer, hParking, hTailgate, harmonParking, harmonTailgate];
           
@@ -117,7 +124,7 @@
             layer.visible = activeLayers.includes(layer);
           });
 
-          // Refresh legend to show only active proposal layers
+          // Force legend to refresh and show only visible layers
           legend.layerInfos = activeLayers.map(layer => {
             return { layer: layer, title: layer.title };
           });
@@ -128,7 +135,7 @@
         document.getElementById("heritageBtn").onclick = () => switchProposal([hParking, hTailgate]);
         document.getElementById("harmonBtn").onclick = () => switchProposal([harmonParking, harmonTailgate]);
         
-        // Ensure initial legend and map state are correct
+        // Default legend state
         switchProposal([tailgateLayer, specializedLayer]);
       });
     });
