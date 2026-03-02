@@ -47,7 +47,6 @@
     ], function(Map, MapView, GeoJSONLayer, Legend) {
 
       // --- POPUP TEMPLATES ---
-      // Note: Fields in GeoJSON are often case-sensitive (e.g., Lot_Name vs lot_name)
       const tailgateTemplate = {
         title: "{Lot_Name}",
         content: [{
@@ -76,7 +75,8 @@
           { value: "Public Parking", symbol: { type: "simple-fill", color: [175, 147, 90, 0.6] }, label: "Public Parking" }
         ]
       };
-// Specific Renderers for Heritage Side
+
+      // Specific Renderers for Heritage Side
       const heritageLotRenderer = {
         type: "unique-value",
         field: "Lot_Name",
@@ -96,7 +96,8 @@
           { value: "VIP", symbol: { type: "simple-fill", color: "#006400" }, label: "VIP Specialized" }
         ]
       };
-      // Renderer for Heritage & Harmon (Using Lot_Name since they lack Parking_Type)
+
+      // Renderer for Harmon (Public Parking)
       const simpleLotRenderer = {
         type: "unique-value",
         field: "Lot_Name",
@@ -135,10 +136,12 @@
 
       const heritageUrl = "./data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson";
 
+      // SPLIT HERITAGE INTO 4 FILTERED LAYERS
       const hParking = new GeoJSONLayer({
         url: heritageUrl,
         title: "Parking Lots",
         renderer: heritageLotRenderer,
+        definitionExpression: "Lot_Name IS NOT NULL AND Lot_Name NOT LIKE '%Restricted%'",
         popupTemplate: tailgateTemplate,
         visible: false
       });
@@ -147,6 +150,7 @@
         url: heritageUrl,
         title: "Tailgating Zones",
         renderer: heritageZoneRenderer,
+        definitionExpression: "Zone_Type = 'Tailgate'",
         popupTemplate: tailgateTemplate,
         visible: false
       });
@@ -155,6 +159,7 @@
         url: heritageUrl,
         title: "Specialized Zones",
         renderer: heritageZoneRenderer,
+        definitionExpression: "Zone_Type IS NOT NULL AND Zone_Type != 'Tailgate'",
         popupTemplate: tailgateTemplate,
         visible: false
       });
@@ -163,6 +168,7 @@
         url: heritageUrl,
         title: "Restricted Lots",
         renderer: heritageLotRenderer,
+        definitionExpression: "Lot_Name LIKE '%Restricted%'",
         popupTemplate: tailgateTemplate,
         visible: false
       });
@@ -175,6 +181,7 @@
         title: "Harmon Lot"
       });
 
+      // --- MAP & VIEW ---
       const map = new Map({
         basemap: "topo-vector",
         layers: [tailgateLayer, specializedLayer, hParking, hTailgate, hSpecialized, hRestricted, harmonLayer]
@@ -196,14 +203,16 @@
           ]
         });
         view.ui.add(legend, "bottom-left");
-function switchProposal(activeLayers, legendInfos) {
-          // Hide every potential layer first
+
+        // Logic to toggle visibility and reset legend content
+        function switchProposal(activeLayers, legendInfos) {
           [tailgateLayer, specializedLayer, hParking, hTailgate, hSpecialized, hRestricted, harmonLayer].forEach(layer => {
             layer.visible = activeLayers.includes(layer);
           });
           legend.layerInfos = legendInfos;
         }
 
+        // BUTTON CLICKS
         document.getElementById("primaryBtn").onclick = () => switchProposal(
           [tailgateLayer, specializedLayer],
           [
@@ -215,12 +224,13 @@ function switchProposal(activeLayers, legendInfos) {
         document.getElementById("heritageBtn").onclick = () => switchProposal(
           [hParking, hTailgate, hSpecialized, hRestricted], 
           [
-            { layer: hParking, title: "Heritage: Parking" },
-            { layer: hTailgate, title: "Heritage: Tailgating" },
-            { layer: hSpecialized, title: "Heritage: Specialized" },
-            { layer: hRestricted, title: "Heritage: Restricted" }
+            { layer: hParking, title: "Parking Lots" },
+            { layer: hTailgate, title: "Tailgating Zones" },
+            { layer: hSpecialized, title: "Specialized Zones" },
+            { layer: hRestricted, title: "Restricted Lots" }
           ]
         );
+
         document.getElementById("harmonBtn").onclick = () => switchProposal(
           [harmonLayer], 
           [{ layer: harmonLayer, title: "Harmon Lot Layout" }]
