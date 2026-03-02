@@ -76,7 +76,26 @@
           { value: "Public Parking", symbol: { type: "simple-fill", color: [175, 147, 90, 0.6] }, label: "Public Parking" }
         ]
       };
+// Specific Renderers for Heritage Side
+      const heritageLotRenderer = {
+        type: "unique-value",
+        field: "Lot_Name",
+        defaultSymbol: { type: "simple-fill", color: [175, 147, 90, 0.5], outline: { color: "white", width: 1 } },
+        uniqueValueInfos: [
+          { value: "Heritage Lot", symbol: { type: "simple-fill", color: "#af935a" }, label: "Heritage Main" },
+          { value: "Accessible Parking", symbol: { type: "simple-fill", color: [30, 100, 200, 0.6] }, label: "Accessible Parking" }
+        ]
+      };
 
+      const heritageZoneRenderer = {
+        type: "unique-value",
+        field: "Zone_Type",
+        defaultSymbol: { type: "simple-fill", color: [100, 100, 100, 0.3] },
+        uniqueValueInfos: [
+          { value: "Tailgate", symbol: { type: "simple-fill", color: "#228b22" }, label: "Tailgate Area" },
+          { value: "VIP", symbol: { type: "simple-fill", color: "#006400" }, label: "VIP Specialized" }
+        ]
+      };
       // Renderer for Heritage & Harmon (Using Lot_Name since they lack Parking_Type)
       const simpleLotRenderer = {
         type: "unique-value",
@@ -114,12 +133,38 @@
         title: "Specialized Zones"
       });
 
-      const heritageLayer = new GeoJSONLayer({
-        url: "./data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson",
-        renderer: simpleLotRenderer,
+      const heritageUrl = "./data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson";
+
+      const hParking = new GeoJSONLayer({
+        url: heritageUrl,
+        title: "Parking Lots",
+        renderer: heritageLotRenderer,
         popupTemplate: tailgateTemplate,
-        visible: false,
-        title: "Heritage Side"
+        visible: false
+      });
+
+      const hTailgate = new GeoJSONLayer({
+        url: heritageUrl,
+        title: "Tailgating Zones",
+        renderer: heritageZoneRenderer,
+        popupTemplate: tailgateTemplate,
+        visible: false
+      });
+
+      const hSpecialized = new GeoJSONLayer({
+        url: heritageUrl,
+        title: "Specialized Zones",
+        renderer: heritageZoneRenderer,
+        popupTemplate: tailgateTemplate,
+        visible: false
+      });
+
+      const hRestricted = new GeoJSONLayer({
+        url: heritageUrl,
+        title: "Restricted Lots",
+        renderer: heritageLotRenderer,
+        popupTemplate: tailgateTemplate,
+        visible: false
       });
 
       const harmonLayer = new GeoJSONLayer({
@@ -132,7 +177,7 @@
 
       const map = new Map({
         basemap: "topo-vector",
-        layers: [tailgateLayer, specializedLayer, heritageLayer, harmonLayer]
+        layers: [tailgateLayer, specializedLayer, hParking, hTailgate, hSpecialized, hRestricted, harmonLayer]
       });
 
       const view = new MapView({
@@ -151,9 +196,9 @@
           ]
         });
         view.ui.add(legend, "bottom-left");
-
-        function switchProposal(activeLayers, legendInfos) {
-          [tailgateLayer, specializedLayer, heritageLayer, harmonLayer].forEach(layer => {
+function switchProposal(activeLayers, legendInfos) {
+          // Hide every potential layer first
+          [tailgateLayer, specializedLayer, hParking, hTailgate, hSpecialized, hRestricted, harmonLayer].forEach(layer => {
             layer.visible = activeLayers.includes(layer);
           });
           legend.layerInfos = legendInfos;
@@ -168,10 +213,14 @@
         );
 
         document.getElementById("heritageBtn").onclick = () => switchProposal(
-          [heritageLayer], 
-          [{ layer: heritageLayer, title: "Heritage Side Layout" }]
+          [hParking, hTailgate, hSpecialized, hRestricted], 
+          [
+            { layer: hParking, title: "Heritage: Parking" },
+            { layer: hTailgate, title: "Heritage: Tailgating" },
+            { layer: hSpecialized, title: "Heritage: Specialized" },
+            { layer: hRestricted, title: "Heritage: Restricted" }
+          ]
         );
-
         document.getElementById("harmonBtn").onclick = () => switchProposal(
           [harmonLayer], 
           [{ layer: harmonLayer, title: "Harmon Lot Layout" }]
