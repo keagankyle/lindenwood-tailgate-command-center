@@ -133,7 +133,40 @@
           { value: "Tailgate Lot ONLY - No Parking", symbol: { type: "simple-fill", color: [0, 100, 0, 0.7] }, label: "End Zone Club" }
         ]
       };
+// Harmon Lot Renderers
+const harmonParkingRenderer = {
+  type: "unique-value",
+  field: "Lot_Name",
+  uniqueValueInfos: [
+    { value: "Public Parking", symbol: { type: "simple-fill", color: "#af935a" }, label: "Public Parking" },
+    { value: "Accessible Parking", symbol: { type: "simple-fill", color: [30, 100, 200, 0.6] }, label: "Accessible Parking" }
+  ]
+};
 
+const harmonTailgateRenderer = {
+  type: "unique-value",
+  field: "Zone_Type",
+  uniqueValueInfos: [
+    { value: "Zone A", symbol: { type: "simple-fill", color: "#228b22" }, label: "Zone A" },
+    { value: "Zone B", symbol: { type: "simple-fill", color: "#006400" }, label: "Zone B" }
+  ]
+};
+
+const harmonSpecializedRenderer = {
+  type: "unique-value",
+  field: "Zone_Type",
+  uniqueValueInfos: [
+    { value: "Lion Pride Tailgate", symbol: { type: "simple-fill", color: "#FFD700" }, label: "Specialized Event Zone" }
+  ]
+};
+
+const harmonRestrictedRenderer = {
+  type: "unique-value",
+  field: "Lot_Name",
+  uniqueValueInfos: [
+    { value: "Restricted Lot", symbol: { type: "simple-fill", color: [255, 0, 0, 0.6] }, label: "Restricted Area" }
+  ]
+};
       // --- LAYERS ---
       const tailgateLayer = new GeoJSONLayer({
         url: "./data/Lindenwood_Tailgate_2026.geojson",
@@ -190,18 +223,47 @@
         visible: false
       });
 
-      const harmonLayer = new GeoJSONLayer({
-        url: "./data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson",
-        renderer: simpleLotRenderer,
-        popupTemplate: tailgateTemplate,
-        visible: false,
-        title: "Harmon Lot"
-      });
+      const harmonUrl = "./data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson";
 
+const harmonParking = new GeoJSONLayer({
+  url: harmonUrl,
+  title: "Parking Lots",
+  renderer: harmonParkingRenderer,
+  definitionExpression: "Lot_Name LIKE '%Parking%'",
+  visible: false
+});
+
+const harmonTailgate = new GeoJSONLayer({
+  url: harmonUrl,
+  title: "Tailgating Zones",
+  renderer: harmonTailgateRenderer,
+  definitionExpression: "Zone_Type LIKE 'Zone %'",
+  visible: false
+});
+
+const harmonSpecialized = new GeoJSONLayer({
+  url: harmonUrl,
+  title: "Specialized Zones",
+  renderer: harmonSpecializedRenderer,
+  definitionExpression: "Zone_Type = 'Lion Pride Tailgate'",
+  visible: false
+});
+
+const harmonRestricted = new GeoJSONLayer({
+  url: harmonUrl,
+  title: "Restricted Lots",
+  renderer: harmonRestrictedRenderer,
+  definitionExpression: "Lot_Name = 'Restricted Lot'",
+  visible: false
+});
       const map = new Map({
-        basemap: "topo-vector",
-        layers: [tailgateLayer, specializedLayer, hParking, hTailgate, hSpecialized, hRestricted, harmonLayer]
-      });
+  basemap: "topo-vector",
+  layers: [
+    tailgateLayer, specializedLayer, 
+    hParking, hTailgate, hSpecialized, hRestricted, 
+    harmonParking, harmonTailgate, harmonSpecialized, harmonRestricted
+  ]
+});
 
       const view = new MapView({
         container: "viewDiv",
@@ -246,9 +308,14 @@
         );
 
         document.getElementById("harmonBtn").onclick = () => switchProposal(
-          [harmonLayer], 
-          [{ layer: harmonLayer, title: "Harmon Lot Layout" }]
-        );
+  [harmonParking, harmonTailgate, harmonSpecialized, harmonRestricted], 
+  [
+    { layer: harmonParking, title: "Parking Lots" },
+    { layer: harmonTailgate, title: "Tailgating Zones" },
+    { layer: harmonSpecialized, title: "Specialized Zones" },
+    { layer: harmonRestricted, title: "Restricted Lots" }
+  ]
+);
       });
     });
   </script>
