@@ -134,12 +134,10 @@ const harmonLayer = new GeoJSONLayer({
     zoom: 16,
     map: map
   });
-
-  view.when(() => {
+view.when(() => {
     // Initialize Legend
     const legend = new Legend({ 
         view: view,
-        // Optional: Only show legend items for features currently on screen
         hideLayersNotInCurrentView: true 
     });
     view.ui.add(legend, "bottom-left");
@@ -156,8 +154,6 @@ const harmonLayer = new GeoJSONLayer({
     }
 
     // --- BUTTON ACTIONS ---
-
-    // Improved Layout (Shows both Parking and Specialized layers)
     document.getElementById("primaryBtn").onclick = () => switchProposal(
         [tailgateLayer, specializedLayer],
         [
@@ -166,18 +162,18 @@ const harmonLayer = new GeoJSONLayer({
         ]
     );
 
-    // Heritage Side
     document.getElementById("heritageBtn").onclick = () => switchProposal(
         [heritageLayer], 
         [{ layer: heritageLayer, title: "Heritage Side Layout" }]
     );
 
-    // Harmon Lot
     document.getElementById("harmonBtn").onclick = () => switchProposal(
         [harmonLayer], 
         [{ layer: harmonLayer, title: "Harmon Lot Layout" }]
     );
-});
-  </script>
+  }); // Closes view.when
+
+}); // THIS WAS MISSING: Closes the require() function
+</script>
 </body>
 </html>
