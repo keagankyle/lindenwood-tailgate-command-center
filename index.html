@@ -40,140 +40,144 @@
 
   <script>
     require([
-  "esri/Map",
-  "esri/views/MapView",
-  "esri/layers/GeoJSONLayer",
-  "esri/widgets/Legend"
-], function(Map, MapView, GeoJSONLayer, Legend) {
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/layers/GeoJSONLayer",
+      "esri/widgets/Legend"
+    ], function(Map, MapView, GeoJSONLayer, Legend) {
 
-  // --- POPUP TEMPLATE ---
-  const tailgateTemplate = {
-    title: "{lot_name}",
-    content: [{
-      type: "fields",
-      fieldInfos: [
-        { fieldName: "lot_name", label: "lot name" },
-        { fieldName: "parking_type", label: "type" },
-        { fieldName: "opening_time", label: "opens" },
-        { fieldName: "permit_required", label: "permit required?" }
-      ]
-    }]
-  };
+      // --- POPUP TEMPLATES ---
+      // Note: Fields in GeoJSON are often case-sensitive (e.g., Lot_Name vs lot_name)
+      const tailgateTemplate = {
+        title: "{Lot_Name}",
+        content: [{
+          type: "fields",
+          fieldInfos: [
+            { fieldName: "Lot_Name", label: "Lot Name" },
+            { fieldName: "Parking_Type", label: "Type" },
+            { fieldName: "Opening_Time", label: "Opens" },
+            { fieldName: "Permit_Required", label: "Permit Required?" }
+          ]
+        }]
+      };
 
-  // --- RENDERERS ---
+      // --- RENDERERS ---
 
-  // Organizes based on Lot_Name
-  const lotRenderer = {
-    type: "unique-value",
-    field: "Lot_Name",
-    defaultSymbol: { type: "simple-fill", color: [128, 128, 128, 0.4], outline: { color: "white", width: 1 } },
-    uniqueValueInfos: [
-      { value: "Lot A", symbol: { type: "simple-fill", color: "#af935a" }, label: "Lot A" },
-      { value: "Lot B", symbol: { type: "simple-fill", color: "#228b22" }, label: "Lot B" },
-      { value: "Lot C", symbol: { type: "simple-fill", color: "#006400" }, label: "Lot C" },
-      { value: "Accessible Parking", symbol: { type: "simple-fill", color: [30, 100, 200, 0.6] }, label: "Accessible Parking" },
-      { value: "Public Parking", symbol: { type: "simple-fill", color: [175, 147, 90, 0.6] }, label: "Public Parking" },
-      { value: "Restricted", symbol: { type: "simple-fill", color: [220, 20, 60, 0.5] }, label: "Restricted" }
-    ]
-  };
+      // Renderer for Improved Layout
+      const lotRenderer = {
+        type: "unique-value",
+        field: "Lot_Name",
+        defaultSymbol: { type: "simple-fill", color: [128, 128, 128, 0.4], outline: { color: "white", width: 1 } },
+        uniqueValueInfos: [
+          { value: "Lot A", symbol: { type: "simple-fill", color: "#af935a" }, label: "Lot A" },
+          { value: "Lot B", symbol: { type: "simple-fill", color: "#228b22" }, label: "Lot B" },
+          { value: "Lot C", symbol: { type: "simple-fill", color: "#006400" }, label: "Lot C" },
+          { value: "Accessible Parking", symbol: { type: "simple-fill", color: [30, 100, 200, 0.6] }, label: "Accessible Parking" },
+          { value: "Public Parking", symbol: { type: "simple-fill", color: [175, 147, 90, 0.6] }, label: "Public Parking" }
+        ]
+      };
 
-  // Organizes based on Parking_Type (replacing missing Zone_Name)
-  const zoneRenderer = {
-    type: "unique-value",
-    field: "Parking_Type",
-    defaultSymbol: { type: "simple-fill", color: [100, 100, 100, 0.2], outline: { color: "white" } },
-    uniqueValueInfos: [
-      { value: "Handicap", symbol: { type: "simple-fill", color: [30, 100, 200, 0.4] }, label: "Accessible Parking" },
-      { value: "Open Parking & Tailgate Lot", symbol: { type: "simple-fill", color: [175, 147, 90, 0.7] }, label: "Lion Pride Tailgate" },
-      { value: "Tailgate Lot ONLY - No Parking", symbol: { type: "simple-fill", color: [0, 100, 0, 0.7] }, label: "End Zone Club" },
-      { value: "Staff & Faculty Area", symbol: { type: "simple-fill", color: [100, 50, 150, 0.6] }, label: "Staff & Faculty Area" }
-    ]
-  };
+      // Renderer for Heritage & Harmon (Using Lot_Name since they lack Parking_Type)
+      const simpleLotRenderer = {
+        type: "unique-value",
+        field: "Lot_Name",
+        defaultSymbol: { type: "simple-fill", color: [175, 147, 90, 0.7], outline: { color: "white", width: 1.5 } },
+        uniqueValueInfos: [
+            { value: "Public Parking", symbol: { type: "simple-fill", color: [34, 139, 34, 0.6] }, label: "Public Parking" }
+        ]
+      };
 
-  // --- LAYERS ---
-  const tailgateLayer = new GeoJSONLayer({
-  url: "./data/Lindenwood_Tailgate_2026.geojson",
-  renderer: lotRenderer,
-  popupTemplate: tailgateTemplate,
-  outFields: ["*"], // Add here
-  title: "Parking & Tailgate Lots"
-});
+      const zoneRenderer = {
+        type: "unique-value",
+        field: "Parking_Type",
+        defaultSymbol: { type: "simple-fill", color: [100, 100, 100, 0.2], outline: { color: "white" } },
+        uniqueValueInfos: [
+          { value: "Handicap", symbol: { type: "simple-fill", color: [30, 100, 200, 0.4] }, label: "Accessible Parking" },
+          { value: "Open Parking & Tailgate Lot", symbol: { type: "simple-fill", color: [175, 147, 90, 0.7] }, label: "Lion Pride Tailgate" },
+          { value: "Tailgate Lot ONLY - No Parking", symbol: { type: "simple-fill", color: [0, 100, 0, 0.7] }, label: "End Zone Club" }
+        ]
+      };
 
-const specializedLayer = new GeoJSONLayer({
-  url: "./data/Lindenwood_Tailgate_2026.geojson",
-  renderer: zoneRenderer,
-  popupTemplate: tailgateTemplate,
-  outFields: ["*"], // Add here
-  title: "Specialized Zones"
-});
+      // --- LAYERS ---
+      const tailgateLayer = new GeoJSONLayer({
+        url: "./data/Lindenwood_Tailgate_2026.geojson",
+        renderer: lotRenderer,
+        popupTemplate: tailgateTemplate,
+        title: "Parking & Tailgate Lots"
+      });
 
-const heritageLayer = new GeoJSONLayer({
-  url: "./data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson",
-  visible: false,
-  popupTemplate: tailgateTemplate,
-  outFields: ["*"], // Add here
-  title: "Heritage Side"
-});
+      const specializedLayer = new GeoJSONLayer({
+        url: "./data/Lindenwood_Tailgate_2026.geojson",
+        renderer: zoneRenderer,
+        popupTemplate: tailgateTemplate,
+        visible: true,
+        title: "Specialized Zones"
+      });
 
-const harmonLayer = new GeoJSONLayer({
-  url: "./data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson",
-  visible: false,
-  popupTemplate: tailgateTemplate,
-  outFields: ["*"], // Add here
-  title: "Harmon Lot"
-});
+      const heritageLayer = new GeoJSONLayer({
+        url: "./data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson",
+        renderer: simpleLotRenderer,
+        popupTemplate: tailgateTemplate,
+        visible: false,
+        title: "Heritage Side"
+      });
 
-  const map = new Map({
-    basemap: "topo-vector",
-    layers: [tailgateLayer, specializedLayer, heritageLayer, harmonLayer]
-  });
+      const harmonLayer = new GeoJSONLayer({
+        url: "./data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson",
+        renderer: simpleLotRenderer,
+        popupTemplate: tailgateTemplate,
+        visible: false,
+        title: "Harmon Lot"
+      });
 
-  const view = new MapView({
-    container: "viewDiv",
-    center: [-90.503, 38.786],
-    zoom: 16,
-    map: map
-  });
-view.when(() => {
-    // Initialize Legend
-    const legend = new Legend({ 
-        view: view,
-        hideLayersNotInCurrentView: true 
-    });
-    view.ui.add(legend, "bottom-left");
+      const map = new Map({
+        basemap: "topo-vector",
+        layers: [tailgateLayer, specializedLayer, heritageLayer, harmonLayer]
+      });
 
-    // Unified function to swap layers AND update the Legend
-    function switchProposal(activeLayers, legendInfos) {
-        // 1. Toggle Layer Visibility
-        [tailgateLayer, specializedLayer, heritageLayer, harmonLayer].forEach(layer => {
-            layer.visible = activeLayers.includes(layer);
-        });
+      const view = new MapView({
+        container: "viewDiv",
+        center: [-90.503, 38.786],
+        zoom: 16,
+        map: map
+      });
 
-        // 2. Update the Legend to match the new selection
-        legend.layerInfos = legendInfos;
-    }
-
-    // --- BUTTON ACTIONS ---
-    document.getElementById("primaryBtn").onclick = () => switchProposal(
-        [tailgateLayer, specializedLayer],
-        [
+      view.when(() => {
+        const legend = new Legend({ 
+          view: view,
+          layerInfos: [
             { layer: tailgateLayer, title: "Parking & Tailgate Lots" },
             { layer: specializedLayer, title: "Specialized Zones" }
-        ]
-    );
+          ]
+        });
+        view.ui.add(legend, "bottom-left");
 
-    document.getElementById("heritageBtn").onclick = () => switchProposal(
-        [heritageLayer], 
-        [{ layer: heritageLayer, title: "Heritage Side Layout" }]
-    );
+        function switchProposal(activeLayers, legendInfos) {
+          [tailgateLayer, specializedLayer, heritageLayer, harmonLayer].forEach(layer => {
+            layer.visible = activeLayers.includes(layer);
+          });
+          legend.layerInfos = legendInfos;
+        }
 
-    document.getElementById("harmonBtn").onclick = () => switchProposal(
-        [harmonLayer], 
-        [{ layer: harmonLayer, title: "Harmon Lot Layout" }]
-    );
-  }); // Closes view.when
+        document.getElementById("primaryBtn").onclick = () => switchProposal(
+          [tailgateLayer, specializedLayer],
+          [
+            { layer: tailgateLayer, title: "Parking & Tailgate Lots" },
+            { layer: specializedLayer, title: "Specialized Zones" }
+          ]
+        );
 
-}); // THIS WAS MISSING: Closes the require() function
-</script>
+        document.getElementById("heritageBtn").onclick = () => switchProposal(
+          [heritageLayer], 
+          [{ layer: heritageLayer, title: "Heritage Side Layout" }]
+        );
+
+        document.getElementById("harmonBtn").onclick = () => switchProposal(
+          [harmonLayer], 
+          [{ layer: harmonLayer, title: "Harmon Lot Layout" }]
+        );
+      });
+    });
+  </script>
 </body>
 </html>
