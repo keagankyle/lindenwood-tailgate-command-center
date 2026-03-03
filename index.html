@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css">
   <script src="https://js.arcgis.com/4.28/"></script>
   <style>
-    html, body, #viewDiv { padding: 0; margin: 0; height: 100%; width: 100%; }
+    html, body, #viewDiv { padding: 0; margin: 0; height: 100%; width: 100%; position: relative; }
     #sidebar {
       position: absolute; top: 10px; right: 10px; width: 250px;
       background: rgba(255, 255, 255, 0.9); padding: 15px;
@@ -17,6 +17,7 @@
     .lu-gold { color: #af935a; font-weight: bold; }
     button { width: 100%; margin-top: 5px; padding: 8px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; }
     button:hover { background-color: #f0f0f0; }
+    #arcgisEmbed { position: absolute; top: 0; left: 0; z-index: 5; display: none; }
   </style>
 </head>
 <body>
@@ -36,18 +37,10 @@
       <button id="harmonBtn">Harmon Lot</button>
     </div>
   </div> 
-<div id="viewDiv">
-    <iframe id="arcgisEmbed" 
-            width="100%" 
-            height="100%" 
-            frameborder="0" 
-            scrolling="no" 
-            marginheight="0" 
-            marginwidth="0" 
-            src="https://www.arcgis.com/apps/mapviewer/index.html?webmap=061264c9869542df984534720978939b"
-            style="display: none; border: none;">
-    </iframe>
-</div>
+
+  <div id="viewDiv">
+    <iframe id="arcgisEmbed" width="100%" height="100%" frameborder="0" src="https://www.arcgis.com/apps/mapviewer/index.html?webmap=061264c9869542df984534720978939b"></iframe>
+  </div>
 
   <script>
     require([
@@ -57,92 +50,40 @@
       "esri/widgets/Legend"
     ], function(Map, MapView, GeoJSONLayer, Legend) {
 
-      const heritageUrl = "./data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson";
-
-      // --- RENDERERS ---
-
-      // Improved Layout Renderers
-      const lotRenderer = {
-        type: "unique-value",
-        field: "Lot_Name",
-        uniqueValueInfos: [
-          { value: "Lot A", symbol: { type: "simple-fill", color: "#af935a" }, label: "Lot A" },
-          { value: "Lot B", symbol: { type: "simple-fill", color: "#228b22" }, label: "Lot B" },
-          { value: "Lot C", symbol: { type: "simple-fill", color: "#006400" }, label: "Lot C" }
-        ]
-      };
-
-      // Heritage Side Renderers
-      const heritageLotRenderer = {
-        type: "unique-value",
-        field: "Lot_Name",
-        uniqueValueInfos: [
-          { value: "Heritage Lot", symbol: { type: "simple-fill", color: "#af935a" }, label: "Heritage Main" },
-          { value: "Visitor Lot", symbol: { type: "simple-fill", color: "#1e64c8" }, label: "Visitor Parking" }
-        ]
-      };
-
-      const zoneTypeRenderer = {
-        type: "unique-value",
-        field: "Zone_Type",
-        uniqueValueInfos: [
-          { value: "VIP", symbol: { type: "simple-fill", color: "#006400" }, label: "VIP Zone" },
-          { value: "Student", symbol: { type: "simple-fill", color: "#228b22" }, label: "Student Zone" }
-        ]
+      const tailgateTemplate = {
+        title: "{Lot_Name}",
+        content: [{
+          type: "fields",
+          fieldInfos: [
+            { fieldName: "Lot_Name", label: "Lot Name" },
+            { fieldName: "Parking_Type", label: "Type" },
+            { fieldName: "Opening_Time", label: "Opens" }
+          ]
+        }]
       };
 
       // --- LAYERS ---
-
-      // Primary Layers
+      // Primary JS Layer (Used as fallback for Improved)
       const tailgateLayer = new GeoJSONLayer({
         url: "./data/Lindenwood_Tailgate_2026.geojson",
-        renderer: lotRenderer,
-        title: "Parking & Tailgate Lots",
-        visible: true
-      });
-
-      // Heritage Layers (Broken into 4 as requested)
-      const heritageParking = new GeoJSONLayer({
-        url: heritageUrl,
-        title: "Parking Lots",
-        renderer: heritageLotRenderer,
-        definitionExpression: "Lot_Name IS NOT NULL AND Zone_Type IS NULL", 
+        title: "Default Layout",
+        popupTemplate: tailgateTemplate,
         visible: false
       });
 
-      const heritageTailgate = new GeoJSONLayer({
-        url: heritageUrl,
-        title: "Tailgating Zones",
-        renderer: zoneTypeRenderer,
-        definitionExpression: "Zone_Type LIKE '%Tailgate%'",
-        visible: false
-      });
+      // Heritage Layers
+      const heritageUrl = "./data/Lindenwood_University_Tailgate_2026_(Heritage_Side).geojson";
+      const hParking = new GeoJSONLayer({ url: heritageUrl, title: "Heritage Parking", visible: false, popupTemplate: tailgateTemplate });
+      const hTailgate = new GeoJSONLayer({ url: heritageUrl, title: "Heritage Tailgate", visible: false, popupTemplate: tailgateTemplate });
 
-      const heritageSpecialized = new GeoJSONLayer({
-        url: heritageUrl,
-        title: "Specialized Zones",
-        renderer: zoneTypeRenderer,
-        definitionExpression: "Zone_Type NOT LIKE '%Tailgate%' AND Zone_Type IS NOT NULL",
-        visible: false
-      });
-
-      const heritageRestricted = new GeoJSONLayer({
-        url: heritageUrl,
-        title: "Restricted Lots",
-        renderer: heritageLotRenderer,
-        definitionExpression: "Lot_Name LIKE '%Restricted%'",
-        visible: false
-      });
-
-      const harmonLayer = new GeoJSONLayer({
-        url: "./data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson",
-        title: "Harmon Lot",
-        visible: false
-      });
+      // Harmon Layers
+      const harmonUrl = "./data/Lindenwood_University_Tailgate_2026_(Harmon_Lot).geojson";
+      const harmonParking = new GeoJSONLayer({ url: harmonUrl, title: "Harmon Parking", visible: false, popupTemplate: tailgateTemplate });
+      const harmonTailgate = new GeoJSONLayer({ url: harmonUrl, title: "Harmon Tailgate", visible: false, popupTemplate: tailgateTemplate });
 
       const map = new Map({
         basemap: "topo-vector",
-        layers: [tailgateLayer, heritageParking, heritageTailgate, heritageSpecialized, heritageRestricted, harmonLayer]
+        layers: [tailgateLayer, hParking, hTailgate, harmonParking, harmonTailgate]
       });
 
       const view = new MapView({
@@ -156,37 +97,39 @@
         const legend = new Legend({ view: view });
         view.ui.add(legend, "bottom-left");
 
-        // Set initial legend
-        legend.layerInfos = [{ layer: tailgateLayer, title: "Improved Layout" }];
-
         function switchProposal(activeLayers, isImproved = false) {
-  const allLayers = [tailgateLayer, specializedLayer, hParking, hTailgate, harmonParking, harmonTailgate];
-  const embedFrame = document.getElementById("arcgisEmbed");
-  const jsMapCanvas = document.querySelector(".esri-view-surface"); // The JS Map surface
+          const allLayers = [tailgateLayer, hParking, hTailgate, harmonParking, harmonTailgate];
+          const embedFrame = document.getElementById("arcgisEmbed");
+          const jsMapCanvas = document.querySelector(".esri-view-root");
 
-  if (isImproved) {
-    // Show the External Web Map Embed
-    embedFrame.style.display = "block";
-    if (jsMapCanvas) jsMapCanvas.style.display = "none";
-    
-    // Hide all JS layers
-    allLayers.forEach(layer => layer.visible = false);
-  } else {
-    // Show the Manual JS Map
-    embedFrame.style.display = "none";
-    if (jsMapCanvas) jsMapCanvas.style.display = "block";
+          if (isImproved) {
+            embedFrame.style.display = "block";
+            if (jsMapCanvas) jsMapCanvas.style.display = "none";
+            legend.container.style.display = "none"; // Hide JS legend for embed
+            allLayers.forEach(l => l.visible = false);
+          } else {
+            embedFrame.style.display = "none";
+            if (jsMapCanvas) jsMapCanvas.style.display = "block";
+            legend.container.style.display = "block";
+            
+            allLayers.forEach(layer => {
+              layer.visible = activeLayers.includes(layer);
+            });
 
-    // Toggle JS layers based on selection
-    allLayers.forEach(layer => {
-      layer.visible = activeLayers.includes(layer);
+            // Update Legend labels
+            legend.layerInfos = activeLayers.map(l => ({ layer: l, title: l.title }));
+          }
+        }
+
+        // Button Click Handlers
+        document.getElementById("primaryBtn").onclick = () => switchProposal([], true);
+        document.getElementById("heritageBtn").onclick = () => switchProposal([hParking, hTailgate], false);
+        document.getElementById("harmonBtn").onclick = () => switchProposal([harmonParking, harmonTailgate], false);
+        
+        // Default to showing the Improved Embed
+        switchProposal([], true);
+      });
     });
-  }
-}
-
-// Update your button clicks
-document.getElementById("primaryBtn").onclick = () => switchProposal([], true);
-document.getElementById("heritageBtn").onclick = () => switchProposal([hParking, hTailgate], false);
-document.getElementById("harmonBtn").onclick = () => switchProposal([harmonParking, harmonTailgate], false);
   </script>
 </body>
 </html>
